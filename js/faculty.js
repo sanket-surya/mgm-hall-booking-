@@ -115,6 +115,27 @@ function wireBookingForm() {
   const messageEl = document.getElementById("booking-message");
   if (!form) return;
 
+  // Wire Quick Slot Presets
+  document.querySelectorAll("[data-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const parts = btn.getAttribute("data-slot").split("-");
+      if (parts.length === 2) {
+        const startEl = document.getElementById("bk-start");
+        const endEl = document.getElementById("bk-end");
+        if (startEl) startEl.value = parts[0];
+        if (endEl) endEl.value = parts[1];
+      }
+    });
+  });
+
+  // Enable click to open date picker easily
+  const dateInput = document.getElementById("bk-date");
+  if (dateInput) {
+    dateInput.addEventListener("click", () => {
+      try { dateInput.showPicker(); } catch (e) {}
+    });
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearMessage(messageEl);
