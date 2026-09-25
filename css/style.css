@@ -1,0 +1,456 @@
+/* ==========================================================================
+   Sir Vishveshwaraiah Conference Hall Booking System — stylesheet
+   MGM's College of Engineering, Nanded
+   ========================================================================== */
+
+:root {
+  --color-primary: #1b3a6d;
+  --color-primary-dark: #12294f;
+  --color-primary-light: #eaf0f9;
+  --color-ink: #1e2430;
+  --color-ink-soft: #5b6472;
+  --color-ink-faint: #8792a2;
+  --color-border: #dce1e8;
+  --color-bg: #f4f6f9;
+  --color-surface: #ffffff;
+
+  --color-success: #1e7b34;
+  --color-success-bg: #e5f4e9;
+  --color-warning: #92660a;
+  --color-warning-bg: #fdf2d9;
+  --color-danger: #a32a2a;
+  --color-danger-bg: #fbeaea;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --shadow-card: 0 1px 2px rgba(18, 41, 79, 0.06);
+
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --sidebar-width: 232px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+
+a { color: var(--color-primary); }
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.hidden { display: none !important; }
+
+/* ---- Buttons -------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.btn-primary { background: var(--color-primary); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+
+.btn-secondary { background: #fff; color: var(--color-ink); border-color: var(--color-border); }
+.btn-secondary:hover:not(:disabled) { border-color: var(--color-ink-faint); }
+
+.btn-danger { background: #fff; color: var(--color-danger); border-color: #e7b9b9; }
+.btn-danger:hover:not(:disabled) { background: var(--color-danger-bg); }
+
+.btn-success { background: #fff; color: var(--color-success); border-color: #b6ddc0; }
+.btn-success:hover:not(:disabled) { background: var(--color-success-bg); }
+
+.btn-ghost { background: transparent; color: var(--color-ink-soft); border-color: transparent; }
+.btn-ghost:hover:not(:disabled) { background: var(--color-primary-light); color: var(--color-primary); }
+
+.btn-sm { padding: 6px 12px; font-size: 13px; }
+.btn-block { width: 100%; }
+
+/* ---- Forms ------------------------------------------------------------ */
+
+.field { margin-bottom: 16px; }
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.field textarea { resize: vertical; min-height: 72px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.field-hint { font-size: 12.5px; color: var(--color-ink-faint); margin-top: 4px; }
+
+.form-message {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  margin-bottom: 16px;
+}
+.form-message.error { background: var(--color-danger-bg); color: var(--color-danger); }
+.form-message.success { background: var(--color-success-bg); color: var(--color-success); }
+
+/* ---- Login page --------------------------------------------------------- */
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--color-bg) 0%, #eef1f6 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(18, 41, 79, 0.08);
+  padding: 36px 32px 32px;
+}
+
+.login-logo {
+  display: block;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.login-card h1 {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-primary-dark);
+  line-height: 1.35;
+}
+
+.login-card .subtitle {
+  display: block;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-ink-soft);
+  margin-top: 6px;
+  margin-bottom: 28px;
+}
+
+.login-footnote {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--color-ink-faint);
+  margin-top: 18px;
+}
+
+/* ---- Dashboard shell ---------------------------------------------------- */
+
+.app-shell { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--color-primary-dark);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 16px;
+}
+
+.sidebar-brand img { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; }
+
+.sidebar-brand .brand-text { font-size: 12.5px; line-height: 1.35; font-weight: 600; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+.sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sidebar-nav button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.sidebar-nav button.active { background: rgba(255, 255, 255, 0.14); color: #fff; }
+
+.sidebar-user {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 14px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.sidebar-user .name { font-weight: 600; color: #fff; }
+.sidebar-user .role { color: rgba(255, 255, 255, 0.6); font-size: 12px; text-transform: capitalize; margin-bottom: 10px; }
+
+.main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.topbar h1 { font-size: 18px; font-weight: 700; color: var(--color-primary-dark); }
+.topbar .college-name { font-size: 13px; color: var(--color-ink-soft); margin-top: 2px; }
+
+.content { padding: 24px 28px 60px; flex: 1; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.view-header h2 { font-size: 20px; font-weight: 700; }
+
+/* ---- Cards / tables ------------------------------------------------- */
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.card-pad { padding: 20px; }
+
+.card + .card { margin-top: 16px; }
+
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+
+.stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+
+.stat-card .stat-value { font-size: 26px; font-weight: 700; color: var(--color-primary-dark); }
+.stat-card .stat-label { font-size: 13px; color: var(--color-ink-soft); margin-top: 4px; }
+
+.table-wrap { overflow-x: auto; border-radius: var(--radius-md); }
+
+table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
+
+thead th {
+  text-align: left;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  vertical-align: top;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafbfd; }
+
+.cell-muted { color: var(--color-ink-soft); font-size: 13px; }
+.cell-strong { font-weight: 600; }
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-ink-soft);
+  font-size: 14px;
+}
+
+/* ---- Badges --------------------------------------------------------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.badge-pending { background: var(--color-warning-bg); color: var(--color-warning); }
+.badge-approved { background: var(--color-success-bg); color: var(--color-success); }
+.badge-rejected { background: var(--color-danger-bg); color: var(--color-danger); }
+.badge-inactive { background: #eceff3; color: var(--color-ink-soft); }
+
+/* ---- Hall cards ------------------------------------------------------- */
+
+.hall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+
+.hall-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 16px;
+}
+
+.hall-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.hall-card .hall-meta { font-size: 13px; color: var(--color-ink-soft); margin-bottom: 8px; }
+.hall-card .hall-desc { font-size: 13px; color: var(--color-ink-soft); margin-bottom: 12px; }
+.hall-card .hall-facilities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.hall-card .facility-tag {
+  font-size: 11.5px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.hall-card .hall-actions { display: flex; gap: 8px; }
+
+/* ---- Modal / inline panel --------------------------------------------- */
+
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.panel-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+
+.inline-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.filter-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-bar select { padding: 8px 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: #fff; }
+
+/* ---- Responsive ------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .app-shell { flex-direction: column; }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    overflow-x: auto;
+  }
+
+  .sidebar-brand { border-bottom: none; margin-bottom: 0; padding: 4px 10px 4px 0; border-right: 1px solid rgba(255,255,255,0.12); }
+  .sidebar-brand .brand-text { display: none; }
+  .sidebar-nav { flex-direction: row; }
+  .sidebar-nav button { white-space: nowrap; }
+  .sidebar-user { display: none; }
+
+  .content { padding: 18px 16px 40px; }
+  .topbar { padding: 14px 16px; }
+  .field-row { grid-template-columns: 1fr; }
+}
+
+/* ---- Quick Demo Box --------------------------------------------------- */
+
+.demo-box {
+  margin-top: 20px;
+  padding: 12px 14px;
+  background: var(--color-primary-light);
+  border: 1px dashed rgba(27, 58, 109, 0.35);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.demo-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.demo-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.demo-buttons .btn {
+  font-size: 12px;
+  padding: 5px 10px;
+}

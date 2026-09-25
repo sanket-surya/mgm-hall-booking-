@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Faculty Dashboard — Sir Vishveshwaraiah Conference Hall Booking System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="images/college-logo.png" alt="College logo" />
+      <span class="brand-text">MGM's College of<br>Engineering, Nanded</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button data-tab-target="view-overview" class="active">Dashboard</button>
+      <button data-tab-target="view-halls">Halls</button>
+      <button data-tab-target="view-book">Book a hall</button>
+      <button data-tab-target="view-my-bookings">My bookings</button>
+      <button data-logout>Log out</button>
+    </nav>
+    <div class="sidebar-user">
+      <div class="name" id="sidebar-name">—</div>
+      <div class="role" id="sidebar-role">—</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>Sir Vishveshwaraiah Conference Hall Booking System</h1>
+      <div class="college-name">MGM's College of Engineering, Nanded — Faculty</div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section id="view-overview" class="view active">
+        <div class="view-header"><h2>Dashboard</h2></div>
+        <div class="stat-row" id="overview-stats"></div>
+        <div class="card card-pad">
+          <p class="cell-muted">Book a hall from the sidebar, or check the status of your existing requests under My bookings.</p>
+        </div>
+      </section>
+
+      <!-- ============ HALLS ============ -->
+      <section id="view-halls" class="view">
+        <div class="view-header"><h2>Available halls</h2></div>
+        <div class="hall-grid" id="halls-grid"></div>
+      </section>
+
+      <!-- ============ BOOK A HALL ============ -->
+      <section id="view-book" class="view">
+        <div class="view-header"><h2>Book a hall</h2></div>
+        <div class="panel">
+          <div id="booking-message" class="form-message error" hidden></div>
+          <form id="booking-form">
+            <div class="field-row">
+              <div class="field">
+                <label for="bk-hall">Hall</label>
+                <select id="bk-hall" required></select>
+              </div>
+              <div class="field">
+                <label for="bk-date">Date</label>
+                <input type="date" id="bk-date" required />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="bk-start">Start time</label>
+                <input type="time" id="bk-start" required />
+              </div>
+              <div class="field">
+                <label for="bk-end">End time</label>
+                <input type="time" id="bk-end" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="bk-event-name">Event name</label>
+              <input type="text" id="bk-event-name" placeholder="e.g. Guest Lecture on Robotics" required />
+            </div>
+            <div class="field">
+              <label for="bk-purpose">Purpose of event</label>
+              <textarea id="bk-purpose" placeholder="1–3 lines describing the event" required></textarea>
+            </div>
+            <div class="field">
+              <label for="bk-attendees">Expected attendees</label>
+              <input type="number" id="bk-attendees" min="1" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit booking request</button>
+            <p class="field-hint">Your request goes to the admin for approval. You'll see its status under My bookings.</p>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ MY BOOKINGS ============ -->
+      <section id="view-my-bookings" class="view">
+        <div class="view-header"><h2>My bookings</h2></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Event</th><th>Hall</th><th>Date &amp; time</th><th>Attendees</th><th>Status</th><th>Rejection reason</th></tr>
+              </thead>
+              <tbody id="my-bookings-tbody">
+                <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/faculty.js"></script>
+</body>
+</html>

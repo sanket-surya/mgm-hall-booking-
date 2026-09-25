@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Dashboard — Sir Vishveshwaraiah Conference Hall Booking System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="images/college-logo.png" alt="College logo" />
+      <span class="brand-text">MGM's College of<br>Engineering, Nanded</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button data-tab-target="view-overview" class="active">Dashboard</button>
+      <button data-tab-target="view-halls">Halls</button>
+      <button data-tab-target="view-bookings">Bookings</button>
+      <button data-tab-target="view-users">Users</button>
+      <button data-logout>Log out</button>
+    </nav>
+    <div class="sidebar-user">
+      <div class="name" id="sidebar-name">—</div>
+      <div class="role" id="sidebar-role">—</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>Sir Vishveshwaraiah Conference Hall Booking System</h1>
+      <div class="college-name">MGM's College of Engineering, Nanded — Admin</div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============ OVERVIEW ============ -->
+      <section id="view-overview" class="view active">
+        <div class="view-header"><h2>Dashboard</h2></div>
+        <div class="stat-row" id="overview-stats"></div>
+        <div class="card card-pad">
+          <p class="cell-muted">Use the sidebar to manage halls, review booking requests, and create or deactivate user accounts.</p>
+        </div>
+      </section>
+
+      <!-- ============ HALLS ============ -->
+      <section id="view-halls" class="view">
+        <div class="view-header"><h2>Conference halls</h2></div>
+
+        <div class="hall-grid" id="halls-grid"></div>
+
+        <div class="panel" style="margin-top:20px">
+          <div class="panel-title" id="hall-form-title">Add a hall</div>
+          <div id="hall-form-message" class="form-message error" hidden></div>
+          <form id="hall-form">
+            <div class="field">
+              <label for="h-name">Hall name</label>
+              <input type="text" id="h-name" required />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="h-capacity">Capacity</label>
+                <input type="number" id="h-capacity" min="1" required />
+              </div>
+              <div class="field">
+                <label for="h-location">Location</label>
+                <input type="text" id="h-location" placeholder="e.g. Main Block" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="h-description">Description</label>
+              <textarea id="h-description" placeholder="Brief description of the hall"></textarea>
+            </div>
+            <div class="field">
+              <label for="h-facilities">Facilities (comma-separated)</label>
+              <input type="text" id="h-facilities" placeholder="Projector, Podium, Sound system" />
+            </div>
+            <div class="field">
+              <label style="display:flex;align-items:center;gap:8px;font-weight:500;color:var(--color-ink)">
+                <input type="checkbox" id="h-active" checked style="width:auto" />
+                Active (visible to Faculty/Organizers for booking)
+              </label>
+            </div>
+            <div class="inline-actions">
+              <button type="submit" class="btn btn-primary">Save hall</button>
+              <button type="button" id="hall-cancel-edit" class="btn btn-secondary hidden">Cancel edit</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ BOOKINGS ============ -->
+      <section id="view-bookings" class="view">
+        <div class="view-header">
+          <h2>Bookings</h2>
+          <div class="filter-bar">
+            <label for="booking-status-filter" class="cell-muted">Status:</label>
+            <select id="booking-status-filter">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event</th><th>Hall</th><th>Date &amp; time</th><th>Requested by</th>
+                  <th>Attendees</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-tbody">
+                <tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ USERS ============ -->
+      <section id="view-users" class="view">
+        <div class="view-header">
+          <h2>Users</h2>
+          <div class="filter-bar">
+            <label for="user-role-filter" class="cell-muted">Role:</label>
+            <select id="user-role-filter">
+              <option value="all">All</option>
+              <option value="admin">Admin</option>
+              <option value="faculty">Faculty</option>
+              <option value="organizer">Organizer</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:20px">
+          <div class="panel-title">Create a new account</div>
+          <div id="create-user-message" class="form-message error" hidden></div>
+          <form id="create-user-form">
+            <div class="field-row">
+              <div class="field">
+                <label for="nu-name">Full name</label>
+                <input type="text" id="nu-name" required />
+              </div>
+              <div class="field">
+                <label for="nu-email">College email</label>
+                <input type="email" id="nu-email" placeholder="name@mgmce.ac.in" required />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="nu-password">Temporary password</label>
+                <input type="password" id="nu-password" minlength="6" required />
+              </div>
+              <div class="field">
+                <label for="nu-role">Role</label>
+                <select id="nu-role">
+                  <option value="faculty">Faculty</option>
+                  <option value="organizer">Organizer</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="nu-department">Department</label>
+              <input type="text" id="nu-department" placeholder="e.g. Computer Science and Engineering" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create account</button>
+            <p class="field-hint">Share the temporary password with the user directly — it is not shown or stored anywhere else. They should be encouraged to change it after logging in via Firebase's password reset.</p>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

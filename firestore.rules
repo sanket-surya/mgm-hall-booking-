@@ -1,0 +1,87 @@
+rules_version = '2';
+
+// ============================================================================
+// Firestore Security Rules
+// Sir Vishveshwaraiah Conference Hall Booking System — MGM's College of
+// Engineering, Nanded
+//
+// Deploy with: firebase deploy --only firestore:rules
+// (or paste into Firebase Console > Firestore Database > Rules)
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Reads the caller's own profile doc. Every rule below that checks a
+    // role or isActive flag reads this one document, which Firestore does
+    // not re-run through these same rules (get()/exists() calls inside
+    // rules are not subject to the rules themselves) — this is the
+    // standard, safe pattern for role checks and does not recurse.
+    function myProfile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isActiveUser() {
+      return isSignedIn() && myProfile().isActive == true;
+    }
+
+    function myRole() {
+      return isActiveUser() ? myProfile().role : null;
+    }
+
+    function isAdmin() {
+      return myRole() == 'admin';
+    }
+
+    // ---- users --------------------------------------------------------
+    // Any authenticated user can read the directory (needed so faculty and
+    // organizers can be looked up); only an admin can create, edit, or
+    // deactivate an account.
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- halls ----------------------------------------------------------
+    // Any authenticated user can read the hall list (needed for the booking
+    // dropdown); only an admin can add, edit, or delete a hall.
+    match /halls/{hallId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- bookings ---------------------------------------------------------
+    // - A signed-in user can read their own bookings; an admin can read all.
+    // - Faculty/organizer accounts can create a booking for themselves only,
+    //   and it must start out "pending" (client cannot self-approve).
+    // - Only an admin can update a booking (approve/reject) or delete one.
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.userId == request.auth.uid);
+
+      allow create: if isActiveUser()
+                    && myRole() in ['faculty', 'organizer']
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.status == 'pending';
+
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
+
+// ============================================================================
+// Known limitation of this rule set (see README.md "Known limitations" for
+// the full explanation): these rules cannot themselves prevent two
+// overlapping bookings from both being approved back-to-back, because a
+// Firestore rule can only validate the single document being written, not
+// scan the rest of the collection for time-range conflicts. Overlap
+// checking here is done in application code (js/faculty.js, js/organizer.js,
+// js/admin.js) at booking time and again at approval time. A fully
+// race-condition-proof guarantee would require a Cloud Function running a
+// Firestore transaction, which is out of scope for this "no backend"
+// project.
+// ============================================================================
