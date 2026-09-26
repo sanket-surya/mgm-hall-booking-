@@ -17,6 +17,10 @@ import {
 import {
   exportBookingsToCSV,
   updateGoogleSheetBookingStatus,
+  syncUserToGoogleSheet,
+  updateUserStatusInGoogleSheet,
+  removeUserFromGoogleSheet,
+  exportUsersToCSV,
   GOOGLE_SHEETS_CONFIG
 } from "./google-sheets.js";
 
@@ -45,6 +49,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const filter = document.getElementById("booking-status-filter").value;
       const rows = bookingsCache.filter((b) => filter === "all" || b.status === filter);
       exportBookingsToCSV(rows.length ? rows : bookingsCache);
+    });
+  }
+
+  const exportUsersBtn = document.getElementById("btn-export-users-excel");
+  if (exportUsersBtn) {
+    exportUsersBtn.addEventListener("click", () => {
+      const filter = document.getElementById("user-role-filter").value;
+      const rows = usersCache.filter((u) => filter === "all" || u.role === filter);
+      exportUsersToCSV(rows.length ? rows : usersCache);
     });
   }
 
@@ -91,9 +104,16 @@ function renderUsersTable() {
       <td>${escapeHtml(u.department || "—")}</td>
       <td>${u.isActive === false ? '<span class="badge badge-inactive">Deactivated</span>' : '<span class="badge badge-approved">Active</span>'}</td>
       <td>
-        <button class="btn btn-sm ${u.isActive === false ? "btn-success" : "btn-danger"}" data-toggle-user="${u.id}" data-next="${u.isActive === false}">
-          ${u.isActive === false ? "Reactivate" : "Deactivate"}
-        </button>
+        <div class="inline-actions">
+          <button class="btn btn-sm ${u.isActive === false ? "btn-success" : "btn-secondary"}" data-toggle-user="${u.id}" data-email="${escapeHtml(u.email || "")}" data-next="${u.isActive === false}">
+            ${u.isActive === false ? "Reactivate" : "Deactivate"}
+          </button>
+          ${u.id !== currentProfile.uid ? `
+            <button class="btn btn-sm btn-danger" data-delete-user="${u.id}" data-name="${escapeHtml(u.name || "")}" data-email="${escapeHtml(u.email || "")}">
+              Remove
+            </button>
+          ` : ""}
+        </div>
       </td>
     </tr>
   `).join("");
@@ -101,6 +121,7 @@ function renderUsersTable() {
   tbody.querySelectorAll("[data-toggle-user]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const uid = btn.getAttribute("data-toggle-user");
+      const email = btn.getAttribute("data-email");
       const makeActive = btn.getAttribute("data-next") === "true";
       if (uid === currentProfile.uid && !makeActive) {
         alert("You can't deactivate your own account while signed in.");
@@ -109,9 +130,39 @@ function renderUsersTable() {
       btn.disabled = true;
       try {
         await updateDoc(doc(db, "users", uid), { isActive: makeActive });
+        // Sync status to Google Sheet
+        updateUserStatusInGoogleSheet(uid, email, makeActive ? "ACTIVE" : "DEACTIVATED").catch(console.warn);
       } catch (err) {
         alert("Couldn't update this user: " + err.message);
       } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+
+  tbody.querySelectorAll("[data-delete-user]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const uid = btn.getAttribute("data-delete-user");
+      const name = btn.getAttribute("data-name");
+      const email = btn.getAttribute("data-email");
+
+      if (uid === currentProfile.uid) {
+        alert("You can't delete your own account.");
+        return;
+      }
+
+      const confirmed = confirm(
+        `Are you sure you want to permanently remove "${name}" (${email})?\n\nThis will remove them from the system and delete their row from the Google Sheet.`
+      );
+      if (!confirmed) return;
+
+      btn.disabled = true;
+      try {
+        await deleteDoc(doc(db, "users", uid));
+        // Remove row directly from Google Sheet
+        removeUserFromGoogleSheet(uid, email).catch(console.warn);
+      } catch (err) {
+        alert("Couldn't remove user: " + err.message);
         btn.disabled = false;
       }
     });
@@ -150,10 +201,12 @@ function wireCreateUserForm() {
     submitBtn.textContent = "Creating…";
 
     try {
+      let createdUid = "";
       // Runs on a temporary secondary Auth session so the admin's own
       // session isn't disturbed — see firebase-config.js for why.
       await withSecondaryAuth(async (secondaryAuth) => {
         const cred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        createdUid = cred.user.uid;
         await setDoc(doc(db, "users", cred.user.uid), {
           uid: cred.user.uid,
           email,
@@ -165,7 +218,17 @@ function wireCreateUserForm() {
         });
       });
 
-      showMessage(messageEl, `Account created for ${name}.`, "success");
+      // Sync new user to Google Sheet
+      syncUserToGoogleSheet({
+        uid: createdUid,
+        email,
+        name,
+        role,
+        department,
+        isActive: true
+      }).catch(console.warn);
+
+      showMessage(messageEl, `Account created for ${name}. Synced to Google Sheet.`, "success");
       form.reset();
     } catch (err) {
       showMessage(messageEl, mapCreateUserError(err.code, err.message));

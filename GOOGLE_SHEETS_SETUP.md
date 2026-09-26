@@ -5,9 +5,13 @@
 ---
 
 ## 🎯 What this does (काय फायदा आहे?)
-1. **Live Google Sheet Sync:** Whenever any Faculty or Organizer submits a conference hall booking request, a new row is instantly added to your College's Google Sheet in real-time.
-2. **Auto Status Update:** When Admin (Sanket / Authority) approves or rejects a booking, the status in the Google Sheet automatically turns **APPROVED** (Green) or **REJECTED** (Red).
-3. **1-Click Excel CSV Export:** On the Admin Dashboard, click **"📊 Export to Excel (.csv)"** to download all records anytime for offline college filing, NAAC audits, or printouts.
+1. **Live Bookings Sync:** Whenever any Faculty or Organizer submits a conference hall booking request, a new row is instantly added to the **"Bookings"** tab in your College's Google Sheet in real-time.
+2. **Auto Booking Status Update:** When Admin (Sanket / Authority) approves or rejects a booking, the status in the Google Sheet automatically turns **APPROVED** (Green) or **REJECTED** (Red).
+3. **Live User Registration Sync:** When any Faculty or Organizer registers on the website (or Admin creates them), their details (Name, Email, Role, Department) are instantly saved into a **"Users"** tab in the Google Sheet.
+4. **Auto User Status & Removal:**
+   - When Admin deactivates/reactivates a user, their status updates in the Google Sheet.
+   - When Admin clicks **"Remove"**, the user's row is **deleted directly from the Google Sheet**!
+5. **1-Click Excel CSV Export:** On the Admin Dashboard, click **"📊 Export to Excel (.csv)"** for Bookings or **"📊 Export Users (.csv)"** to download all records anytime for college records, NAAC inspection, or printouts.
 
 ---
 
