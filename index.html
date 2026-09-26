@@ -67,39 +67,13 @@
       <button type="submit" class="btn btn-primary btn-block">Register &amp; Access Dashboard</button>
     </form>
 
-    <div class="demo-box" id="demo-box">
-      <div class="demo-title">⚡ Quick Demo Login:</div>
-      <div class="demo-buttons">
-        <button type="button" class="btn btn-secondary" id="btn-demo-admin" title="Admin Account">Admin (Sanket)</button>
-        <button type="button" class="btn btn-secondary" id="btn-demo-faculty" title="Faculty Account">Faculty</button>
-        <button type="button" class="btn btn-secondary" id="btn-demo-organizer" title="Organizer Account">Organizer</button>
-      </div>
-    </div>
-
-    <p class="login-footnote" id="login-footnote">Access is limited to Admin, Faculty and Organizer accounts.<br>Authorized MGM CEN domain: <code>@mgmcen.ac.in</code></p>
+    <p class="login-footnote" id="login-footnote">Access is limited to authorized staff with a college email.<br>Domain: <code>@mgmcen.ac.in</code></p>
   </div>
 </div>
 
 <script type="module">
   import { initLoginForm } from "./js/auth.js";
   initLoginForm();
-
-  // Quick Demo Fill buttons
-  document.getElementById("btn-demo-admin")?.addEventListener("click", () => {
-    document.getElementById("email").value = "sanket@mgmce.ac.in";
-    document.getElementById("password").value = "sanket123";
-    document.getElementById("login-form").querySelector("button[type=submit]").click();
-  });
-  document.getElementById("btn-demo-faculty")?.addEventListener("click", () => {
-    document.getElementById("email").value = "faculty@mgmce.ac.in";
-    document.getElementById("password").value = "faculty123";
-    document.getElementById("login-form").querySelector("button[type=submit]").click();
-  });
-  document.getElementById("btn-demo-organizer")?.addEventListener("click", () => {
-    document.getElementById("email").value = "organizer@mgmce.ac.in";
-    document.getElementById("password").value = "organizer123";
-    document.getElementById("login-form").querySelector("button[type=submit]").click();
-  });
 </script>
 
 </body>

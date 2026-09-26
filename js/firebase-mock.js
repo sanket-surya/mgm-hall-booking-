@@ -46,35 +46,13 @@ function getInitialData() {
       {
         id: "usr_admin_sanket",
         uid: "usr_admin_sanket",
-        name: "Sanket",
-        email: "sanket@mgmce.ac.in",
-        password: "sanket123",
+        name: "Sanket Suryawanshi",
+        email: "s25_suryawanshi_sanket@mgmcen.ac.in",
+        password: "sanket@mgm2026",
         role: "admin",
-        department: "Administration",
+        department: "Information Technology",
         isActive: true,
         createdAt: { toMillis: () => Date.now() - 86400000 * 7 }
-      },
-      {
-        id: "usr_faculty_rajesh",
-        uid: "usr_faculty_rajesh",
-        name: "Prof. Rajesh Patil",
-        email: "faculty@mgmce.ac.in",
-        password: "faculty123",
-        role: "faculty",
-        department: "Computer Science & Engineering",
-        isActive: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 5 }
-      },
-      {
-        id: "usr_organizer_council",
-        uid: "usr_organizer_council",
-        name: "Student Council",
-        email: "organizer@mgmce.ac.in",
-        password: "organizer123",
-        role: "organizer",
-        department: "Student Affairs",
-        isActive: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 3 }
       }
     ],
     halls: [
@@ -109,44 +87,7 @@ function getInitialData() {
         isActive: true
       }
     ],
-    bookings: [
-      {
-        id: "bk_sample_01",
-        userId: "usr_faculty_rajesh",
-        userName: "Prof. Rajesh Patil",
-        userEmail: "faculty@mgmce.ac.in",
-        department: "Computer Science & Engineering",
-        hallId: "hall_svch_01",
-        hallName: "Sir Vishveshwaraiah Conference Hall",
-        bookingDate: "2026-09-28",
-        startTime: "10:00",
-        endTime: "13:00",
-        eventName: "National AI & Robotics Symposium",
-        purpose: "Guest lectures from industry leaders for all engineering students.",
-        expectedAttendees: 150,
-        status: "pending",
-        rejectionReason: "",
-        createdAt: { toMillis: () => Date.now() - 3600000 * 4 }
-      },
-      {
-        id: "bk_sample_02",
-        userId: "usr_organizer_council",
-        userName: "Student Council",
-        userEmail: "organizer@mgmce.ac.in",
-        department: "Student Affairs",
-        hallId: "hall_cr_b_03",
-        hallName: "Conference Room B",
-        bookingDate: "2026-09-30",
-        startTime: "14:00",
-        endTime: "16:00",
-        eventName: "Annual Cultural Fest Planning Committee",
-        purpose: "Core team meeting for finalizing schedule and budget allocation.",
-        expectedAttendees: 35,
-        status: "approved",
-        rejectionReason: "",
-        createdAt: { toMillis: () => Date.now() - 3600000 * 20 }
-      }
-    ]
+    bookings: []
   };
 }
 
@@ -160,10 +101,11 @@ function getStore() {
   }
   try {
     const data = JSON.parse(raw);
-    // Ensure admin user is named Sanket
+    // Ensure admin user always has correct details
     const admin = data.users?.find((u) => u.role === "admin");
     if (admin) {
-      admin.name = "Sanket";
+      admin.name = "Sanket Suryawanshi";
+      admin.email = "s25_suryawanshi_sanket@mgmcen.ac.in";
       saveStore(data);
     }
     return data;
