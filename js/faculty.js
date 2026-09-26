@@ -12,7 +12,7 @@ import {
   showMessage, clearMessage, statusBadge, formatDate, formatTime,
   escapeHtml, bindLogoutButtons, initTabs
 } from "./utils.js";
-import { sendBookingToGoogleSheet } from "./google-sheets.js";
+import { sendBookingToGoogleSheet, exportBookingsToCSV } from "./google-sheets.js";
 
 let currentProfile = null;
 let hallsCache = [];
@@ -33,6 +33,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (dateInput) {
     const today = new Date().toISOString().split("T")[0];
     dateInput.min = today;
+  }
+
+  const exportBtn = document.getElementById("btn-export-my-bookings");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      exportBookingsToCSV(myBookingsCache);
+    });
   }
 
   wireBookingForm();
