@@ -204,6 +204,23 @@
   </div>
 </div>
 
+<script>
+  (function () {
+    function activateTab(targetId) {
+      document.querySelectorAll(".view").forEach(function (v) {
+        v.classList.toggle("active", v.id === targetId);
+      });
+      document.querySelectorAll("[data-tab-target]").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-tab-target") === targetId);
+      });
+    }
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-tab-target]");
+      if (btn) { var t = btn.getAttribute("data-tab-target"); if (t) activateTab(t); }
+    });
+  })();
+</script>
+
 <script type="module" src="js/faculty.js"></script>
 </body>
 </html>

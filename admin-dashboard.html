@@ -350,6 +350,27 @@
   </div>
 </div>
 
+<script>
+  // Instant tab switcher — fires immediately, no Firebase wait needed
+  (function () {
+    function activateTab(targetId) {
+      document.querySelectorAll(".view").forEach(function (v) {
+        v.classList.toggle("active", v.id === targetId);
+      });
+      document.querySelectorAll("[data-tab-target]").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-tab-target") === targetId);
+      });
+    }
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-tab-target]");
+      if (btn) {
+        var target = btn.getAttribute("data-tab-target");
+        if (target) activateTab(target);
+      }
+    });
+  })();
+</script>
+
 <script type="module" src="js/admin.js"></script>
 </body>
 </html>
