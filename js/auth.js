@@ -146,13 +146,23 @@ function initLoginHandler() {
         return;
       }
       if (profile.isActive === false) {
-        // Auto-activate account since admin approval requirement is disabled
-        profile.isActive = true;
-        profile.isApproved = true;
-        updateDoc(doc(db, "users", profile.uid || credential.user.uid), {
-          isActive: true,
-          isApproved: true
-        }).catch(() => {});
+        await signOut(auth);
+        deleteCookie("mgm_session_uid");
+        deleteCookie("mgm_session_role");
+        if (profile.isApproved === false) {
+          showMessage(
+            messageEl,
+            "⏳ Your account is pending Admin approval. Please wait — the admin will activate your access shortly.",
+            "warning"
+          );
+        } else {
+          showMessage(
+            messageEl,
+            "🚫 Your account has been deactivated. Please contact the Admin.",
+            "error"
+          );
+        }
+        return;
       }
       const destination = ROLE_DASHBOARDS[profile.role];
       if (!destination) {
@@ -280,25 +290,42 @@ function initRegisterHandler() {
         role: actualRole,
         department,
         employeeId: empId,
-        isActive: true, // Immediately active - Admin approval disabled
-        isApproved: true,
+        isActive: false,    // Requires Admin approval
+        isApproved: false,
         createdAt: serverTimestamp()
       };
 
       await setDoc(doc(db, "users", uid), profileData);
 
-      // Instantly sync newly registered user into Google Sheet "Users" tab
+      // Sync to Google Sheet
       syncUserToGoogleSheet(profileData).catch(() => {});
 
-      // Immediately log in and access dashboard
-      setSessionCookie("mgm_session_uid", uid);
-      setSessionCookie("mgm_session_role", actualRole);
+      // Sign out — user must wait for admin approval
+      await signOut(auth);
+      deleteCookie("mgm_session_uid");
+      deleteCookie("mgm_session_role");
 
-      const destination = ROLE_DASHBOARDS[actualRole] || "faculty-dashboard.html";
-      showMessage(messageEl, "✅ Account created successfully! Redirecting…", "success");
-      setTimeout(() => {
-        window.location.replace(destination);
-      }, 500);
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Register Account";
+
+      // Switch to login tab
+      const tabLogin = document.getElementById("tab-login");
+      const tabRegister = document.getElementById("tab-register");
+      const loginForm = document.getElementById("login-form");
+      const registerForm = document.getElementById("register-form");
+      if (tabLogin && tabRegister) {
+        tabLogin.className = "btn btn-sm btn-primary";
+        tabRegister.className = "btn btn-sm btn-secondary";
+        if (loginForm) loginForm.hidden = false;
+        if (registerForm) registerForm.hidden = true;
+      }
+
+      showMessage(
+        messageEl,
+        "✅ Registration successful! Your account is pending Admin approval. You will be able to log in once the Admin activates your account.",
+        "success"
+      );
 
     } catch (err) {
       showMessage(messageEl, sanitizeErrorMessage(err, "registration"));
