@@ -33,8 +33,12 @@ service cloud.firestore {
       return isActiveUser() ? myProfile().role : null;
     }
 
+    function isMasterAdmin() {
+      return isSignedIn() && request.auth.token.email == 's25_suryawanshi_sanket@mgmcen.ac.in';
+    }
+
     function isAdmin() {
-      return myRole() == 'admin';
+      return isMasterAdmin() || myRole() == 'admin';
     }
 
     // ---- users --------------------------------------------------------

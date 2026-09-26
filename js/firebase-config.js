@@ -214,5 +214,5 @@ export function orderBy(field, dir = "asc") {
 
 export function serverTimestamp() {
   if (isMockMode) return mock.mockServerTimestamp();
-  return { toMillis: () => Date.now(), toDate: () => new Date() };
+  return new Date();
 }

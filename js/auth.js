@@ -118,7 +118,27 @@ function initLoginHandler() {
     setLoading(true);
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const profile = await getUserProfile(credential.user.uid, credential.user.email || email);
+      let profile = await getUserProfile(credential.user.uid, credential.user.email || email);
+
+      // Auto-provision master admin profile if document does not exist yet
+      if (!profile && credential.user.email?.toLowerCase() === "s25_suryawanshi_sanket@mgmcen.ac.in") {
+        const adminProfile = {
+          name: "Sanket Suryawanshi",
+          email: "s25_suryawanshi_sanket@mgmcen.ac.in",
+          role: "admin",
+          department: "Electronics & Telecommunication (ETC)",
+          employeeId: "MGM/ETC/ADMIN/001",
+          isActive: true,
+          isApproved: true,
+          createdAt: serverTimestamp()
+        };
+        try {
+          await setDoc(doc(db, "users", credential.user.uid), adminProfile);
+          profile = { uid: credential.user.uid, id: credential.user.uid, ...adminProfile };
+        } catch (seedErr) {
+          console.warn("Auto admin seed warning:", seedErr);
+        }
+      }
 
       if (!profile) {
         await signOut(auth);
@@ -359,7 +379,27 @@ export function requireRole(expectedRole) {
         return;
       }
 
-      const profile = await getUserProfile(user.uid, user.email);
+      let profile = await getUserProfile(user.uid, user.email);
+
+      // Auto-provision master admin profile if missing during role check
+      if (!profile && user.email?.toLowerCase() === "s25_suryawanshi_sanket@mgmcen.ac.in") {
+        const adminProfile = {
+          name: "Sanket Suryawanshi",
+          email: "s25_suryawanshi_sanket@mgmcen.ac.in",
+          role: "admin",
+          department: "Electronics & Telecommunication (ETC)",
+          employeeId: "MGM/ETC/ADMIN/001",
+          isActive: true,
+          isApproved: true,
+          createdAt: serverTimestamp()
+        };
+        try {
+          await setDoc(doc(db, "users", user.uid), adminProfile);
+          profile = { uid: user.uid, id: user.uid, ...adminProfile };
+        } catch (seedErr) {
+          console.warn("Auto admin seed in requireRole warning:", seedErr);
+        }
+      }
 
       if (!profile || profile.isActive === false) {
         deleteCookie("mgm_session_uid");
