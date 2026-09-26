@@ -52,7 +52,7 @@ export function initLoginForm() {
     if (!isAllowedCollegeEmail(email)) {
       showMessage(
         messageEl,
-        "Please sign in with your college email address (@mgmce.ac.in or @mgmnanded.ac.in)."
+        "Please sign in with your college email address (@mgmcen.ac.in)."
       );
       return;
     }

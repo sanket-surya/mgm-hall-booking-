@@ -117,7 +117,7 @@ function wireCreateUserForm() {
       return;
     }
     if (!isAllowedCollegeEmail(email)) {
-      showMessage(messageEl, "Use a college email address (@mgmce.ac.in or @mgmnanded.ac.in).");
+      showMessage(messageEl, "Use a college email address (@mgmcen.ac.in).");
       return;
     }
     if (password.length < 6) {

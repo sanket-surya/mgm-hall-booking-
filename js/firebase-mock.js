@@ -222,9 +222,15 @@ export async function mockSignInWithEmailAndPassword(auth, email, password) {
     (u) => u.email.trim().toLowerCase() === normalizedEmail
   );
 
-  // If typed admin@mgmce.ac.in or admin@mgmnanded.ac.in, map to Sanket
-  if (!user && (normalizedEmail === "admin@mgmce.ac.in" || normalizedEmail === "admin@mgmnanded.ac.in")) {
+  // If typed admin@mgmcen.ac.in / sanket@mgmcen.ac.in etc., match correctly
+  if (!user && (normalizedEmail.startsWith("admin@") || normalizedEmail.startsWith("sanket@"))) {
     user = store.users.find((u) => u.role === "admin");
+  }
+  if (!user && normalizedEmail.startsWith("faculty@")) {
+    user = store.users.find((u) => u.role === "faculty");
+  }
+  if (!user && normalizedEmail.startsWith("organizer@")) {
+    user = store.users.find((u) => u.role === "organizer");
   }
 
   if (!user) {

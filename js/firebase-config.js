@@ -23,7 +23,7 @@ export const firebaseConfig = {
 };
 
 // College email domains permitted to log in
-export const ALLOWED_EMAIL_DOMAINS = ["mgmce.ac.in", "mgmnanded.ac.in"];
+export const ALLOWED_EMAIL_DOMAINS = ["mgmcen.ac.in", "mgmce.ac.in", "mgmnanded.ac.in"];
 
 // Detect if we should use Offline Demo/Mock Mode
 export const isMockMode = !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY";
