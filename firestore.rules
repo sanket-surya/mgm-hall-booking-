@@ -34,11 +34,14 @@ service cloud.firestore {
     }
 
     function isMasterAdmin() {
-      return isSignedIn() && request.auth.token.email == 's25_suryawanshi_sanket@mgmcen.ac.in';
+      return isSignedIn() && (
+        request.auth.token.email == 's25_suryawanshi_sanket@mgmcen.ac.in'
+      );
     }
 
     function isAdmin() {
-      return isMasterAdmin() || myRole() == 'admin';
+      return isMasterAdmin() ||
+             (isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && myProfile().role == 'admin');
     }
 
     // ---- users --------------------------------------------------------
