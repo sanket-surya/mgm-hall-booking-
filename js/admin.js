@@ -11,7 +11,7 @@ import {
 } from "./firebase-config.js";
 import {
   isAllowedCollegeEmail, showMessage, clearMessage, statusBadge,
-  formatDate, formatTime, escapeHtml, timesOverlap,
+  formatDate, formatTime, calcDuration, escapeHtml, timesOverlap,
   bindLogoutButtons, initTabs, sanitizeErrorMessage
 } from "./utils.js";
 import {
@@ -566,7 +566,7 @@ function renderBookingsTable() {
   const rows = bookingsCache.filter((b) => filter === "all" || b.status === filter);
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No bookings match this filter.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No bookings match this filter.</div></td></tr>`;
     return;
   }
 
@@ -575,6 +575,7 @@ function renderBookingsTable() {
       <td class="cell-strong">${escapeHtml(b.eventName)}</td>
       <td>${escapeHtml(b.hallName)}</td>
       <td>${formatDate(b.bookingDate)}<br><span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span></td>
+      <td><span class="badge badge-info" style="font-weight:600;">${calcDuration(b.startTime, b.endTime)}</span></td>
       <td>${escapeHtml(b.userName)}<br><span class="cell-muted">${escapeHtml(b.userEmail)}</span></td>
       <td>${escapeHtml(String(b.expectedAttendees ?? "—"))}</td>
       <td>${statusBadge(b.status)}${b.status === "rejected" && b.rejectionReason ? `<div class="cell-muted">${escapeHtml(b.rejectionReason)}</div>` : ""}</td>
@@ -686,13 +687,14 @@ function renderOverviewStats() {
   if (pendingTbody) {
     const pendingList = bookingsCache.filter((b) => b.status === "pending");
     if (pendingList.length === 0) {
-      pendingTbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No pending booking requests.</div></td></tr>`;
+      pendingTbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">No pending booking requests.</div></td></tr>`;
     } else {
       pendingTbody.innerHTML = pendingList.map((b) => `
         <tr data-booking-id="${escapeHtml(b.id)}">
           <td class="cell-strong">${escapeHtml(b.eventName)}</td>
           <td>${escapeHtml(b.hallName)}</td>
           <td>${formatDate(b.bookingDate)}<br><span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span></td>
+          <td><span class="badge badge-info" style="font-weight:600;">${calcDuration(b.startTime, b.endTime)}</span></td>
           <td>${escapeHtml(b.userName)}<br><span class="cell-muted">${escapeHtml(b.userEmail)}</span></td>
           <td>${escapeHtml(String(b.expectedAttendees ?? "—"))}</td>
           <td>

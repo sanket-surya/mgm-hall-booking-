@@ -9,7 +9,7 @@ import {
   collection, addDoc, onSnapshot, query, where, serverTimestamp
 } from "./firebase-config.js";
 import {
-  showMessage, clearMessage, statusBadge, formatDate, formatTime,
+  showMessage, clearMessage, statusBadge, formatDate, formatTime, calcDuration,
   escapeHtml, bindLogoutButtons, initTabs, sanitizeErrorMessage
 } from "./utils.js";
 import { sendBookingToGoogleSheet, exportBookingsToCSV } from "./google-sheets.js";
@@ -279,7 +279,7 @@ function renderMyBookingsTable() {
   if (!tbody) return;
 
   if (myBookingsCache.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">You have not submitted any booking requests yet.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">You have not submitted any booking requests yet.</div></td></tr>`;
     return;
   }
 
@@ -294,6 +294,7 @@ function renderMyBookingsTable() {
         ${formatDate(b.bookingDate)}<br>
         <span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span>
       </td>
+      <td><span class="badge badge-info" style="font-weight:600;">${calcDuration(b.startTime, b.endTime)}</span></td>
       <td>${escapeHtml(String(b.expectedAttendees ?? "—"))}</td>
       <td>${statusBadge(b.status)}</td>
       <td>
@@ -326,7 +327,7 @@ function renderOverviewStats() {
   const recentTbody = document.getElementById("overview-recent-tbody");
   if (recentTbody) {
     if (myBookingsCache.length === 0) {
-      recentTbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No booking requests submitted yet.</div></td></tr>`;
+      recentTbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No booking requests submitted yet.</div></td></tr>`;
     } else {
       recentTbody.innerHTML = myBookingsCache.slice(0, 5).map((b) => `
         <tr>
@@ -339,6 +340,7 @@ function renderOverviewStats() {
             ${formatDate(b.bookingDate)}<br>
             <span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span>
           </td>
+          <td><span class="badge badge-info" style="font-weight:600;">${calcDuration(b.startTime, b.endTime)}</span></td>
           <td>${statusBadge(b.status)}</td>
         </tr>
       `).join("");

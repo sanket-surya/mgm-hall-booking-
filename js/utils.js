@@ -104,6 +104,24 @@ export function formatTime(timeStr) {
 }
 
 /**
+ * Calculates human-readable duration between two HH:MM time strings.
+ * @param {string} startTime - e.g. "10:00"
+ * @param {string} endTime - e.g. "14:30"
+ * @returns {string} e.g. "4h 30m"
+ */
+export function calcDuration(startTime, endTime) {
+  if (!startTime || !endTime) return "—";
+  const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const diff = toMin(endTime) - toMin(startTime);
+  if (diff <= 0) return "—";
+  const h = Math.floor(diff / 60);
+  const m = diff % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
+/**
  * Safely escapes characters for HTML insertion.
  * @param {string|number|null|undefined} str
  * @returns {string}

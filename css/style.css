@@ -358,6 +358,7 @@ tbody tr:hover { background: #fafbfd; }
 .badge-approved { background: var(--color-success-bg); color: var(--color-success); }
 .badge-rejected { background: var(--color-danger-bg); color: var(--color-danger); }
 .badge-inactive { background: #eceff3; color: var(--color-ink-soft); }
+.badge-info { background: #e0f2fe; color: #0369a1; }
 
 /* ---- Hall cards ------------------------------------------------------- */
 
