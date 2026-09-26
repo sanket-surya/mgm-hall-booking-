@@ -14,12 +14,12 @@ import * as mock from "./firebase-mock.js";
 // When apiKey is "YOUR_API_KEY", Demo/Mock Mode runs automatically.
 // ==========================================================================
 export const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDsq9jV1dzy62mUi4Rt3I6yiQNY2ekx5qg",
+  authDomain: "mgm-hall-booking-1c503.firebaseapp.com",
+  projectId: "mgm-hall-booking-1c503",
+  storageBucket: "mgm-hall-booking-1c503.firebasestorage.app",
+  messagingSenderId: "575040570479",
+  appId: "1:575040570479:web:b8aa5c22816ee48912799a"
 };
 
 // College email domains permitted to log in
