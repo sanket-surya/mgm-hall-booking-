@@ -21,7 +21,7 @@
     <nav class="sidebar-nav">
       <button data-tab-target="view-overview" class="active">Dashboard</button>
       <button data-tab-target="view-halls">Halls</button>
-      <button data-tab-target="view-bookings">Bookings</button>
+      <button data-tab-target="view-bookings" id="nav-bookings-btn">Bookings</button>
       <button data-tab-target="view-users">Users</button>
       <button data-logout>Log out</button>
     </nav>
@@ -43,8 +43,28 @@
       <section id="view-overview" class="view active">
         <div class="view-header"><h2>Dashboard</h2></div>
         <div class="stat-row" id="overview-stats"></div>
-        <div class="card card-pad">
-          <p class="cell-muted">Use the sidebar to manage halls, review booking requests, and create or deactivate user accounts.</p>
+        <div class="card card-pad" style="margin-bottom: 20px;">
+          <p class="cell-muted" style="margin:0">Use the sidebar to manage halls, review booking requests, and create or deactivate user accounts.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--color-border);">
+            <h3 style="margin:0; font-size:16px; font-weight:600;">Pending Booking Approvals</h3>
+            <button type="button" class="btn btn-sm btn-secondary" data-tab-target="view-bookings">View All Bookings →</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event</th><th>Hall</th><th>Date &amp; time</th><th>Requested by</th>
+                  <th>Attendees</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="overview-pending-tbody">
+                <tr><td colspan="6"><div class="empty-state">No pending booking requests.</div></td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 

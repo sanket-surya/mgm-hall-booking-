@@ -542,4 +542,44 @@ function renderOverviewStats() {
       ? `Users <span style="background:#ef4444; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:6px; font-weight:700;">${pendingApprovals}</span>`
       : 'Users';
   }
+
+  // Update Bookings sidebar button with badge if any pending requests
+  const bookingsNavBtn = document.getElementById("nav-bookings-btn") || document.querySelector('button[data-tab-target="view-bookings"]');
+  if (bookingsNavBtn) {
+    bookingsNavBtn.innerHTML = pending > 0
+      ? `Bookings <span style="background:#2563eb; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:6px; font-weight:700;">${pending}</span>`
+      : 'Bookings';
+  }
+
+  // Render pending bookings on Overview tab
+  const pendingTbody = document.getElementById("overview-pending-tbody");
+  if (pendingTbody) {
+    const pendingList = bookingsCache.filter((b) => b.status === "pending");
+    if (pendingList.length === 0) {
+      pendingTbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No pending booking requests.</div></td></tr>`;
+    } else {
+      pendingTbody.innerHTML = pendingList.map((b) => `
+        <tr data-booking-id="${escapeHtml(b.id)}">
+          <td class="cell-strong">${escapeHtml(b.eventName)}</td>
+          <td>${escapeHtml(b.hallName)}</td>
+          <td>${formatDate(b.bookingDate)}<br><span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span></td>
+          <td>${escapeHtml(b.userName)}<br><span class="cell-muted">${escapeHtml(b.userEmail)}</span></td>
+          <td>${escapeHtml(String(b.expectedAttendees ?? "—"))}</td>
+          <td>
+            <div class="inline-actions">
+              <button type="button" class="btn btn-sm btn-primary" data-overview-approve="${escapeHtml(b.id)}">Approve</button>
+              <button type="button" class="btn btn-sm btn-danger" data-overview-reject="${escapeHtml(b.id)}">Reject</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      pendingTbody.querySelectorAll("[data-overview-approve]").forEach((btn) => {
+        btn.addEventListener("click", () => approveBooking(btn.dataset.overviewApprove));
+      });
+      pendingTbody.querySelectorAll("[data-overview-reject]").forEach((btn) => {
+        btn.addEventListener("click", () => rejectBooking(btn.dataset.overviewReject));
+      });
+    }
+  }
 }

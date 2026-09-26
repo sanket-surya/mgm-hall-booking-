@@ -27,6 +27,15 @@ function notifyListeners(collectionName) {
       // Silently handled
     }
   });
+// Listen for storage events across other tabs in the same browser
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === STORAGE_KEY) {
+      listeners.forEach((_, colName) => {
+        notifyListeners(colName);
+      });
+    }
+  });
 }
 
 const authListeners = new Set();
@@ -52,7 +61,32 @@ function getInitialData() {
         role: "admin",
         department: "Information Technology",
         isActive: true,
+        isApproved: true,
         createdAt: { toMillis: () => Date.now() - 86400000 * 7 }
+      },
+      {
+        id: "usr_faculty_demo",
+        uid: "usr_faculty_demo",
+        name: "Prof. Faculty Member",
+        email: "faculty@mgmcen.ac.in",
+        password: "faculty@mgm2026",
+        role: "faculty",
+        department: "Computer Science & Engineering (CSE)",
+        isActive: true,
+        isApproved: true,
+        createdAt: { toMillis: () => Date.now() - 86400000 * 5 }
+      },
+      {
+        id: "usr_organizer_demo",
+        uid: "usr_organizer_demo",
+        name: "Event Coordinator",
+        email: "organizer@mgmcen.ac.in",
+        password: "organizer@mgm2026",
+        role: "organizer",
+        department: "Information Technology (IT)",
+        isActive: true,
+        isApproved: true,
+        createdAt: { toMillis: () => Date.now() - 86400000 * 3 }
       }
     ],
     halls: [
@@ -102,10 +136,49 @@ function getStore() {
   try {
     const data = JSON.parse(raw);
     // Ensure admin user always has correct details
-    const admin = data.users?.find((u) => u.role === "admin");
+    let needsSave = false;
+    if (!data.users) data.users = [];
+    if (!data.bookings) data.bookings = [];
+
+    const admin = data.users.find((u) => u.role === "admin");
     if (admin) {
       admin.name = "Sanket Suryawanshi";
       admin.email = "s25_suryawanshi_sanket@mgmcen.ac.in";
+      needsSave = true;
+    }
+    const faculty = data.users.find((u) => u.email === "faculty@mgmcen.ac.in");
+    if (!faculty) {
+      data.users.push({
+        id: "usr_faculty_demo",
+        uid: "usr_faculty_demo",
+        name: "Prof. Faculty Member",
+        email: "faculty@mgmcen.ac.in",
+        password: "faculty@mgm2026",
+        role: "faculty",
+        department: "Computer Science & Engineering (CSE)",
+        isActive: true,
+        isApproved: true,
+        createdAt: { toMillis: () => Date.now() - 86400000 * 5 }
+      });
+      needsSave = true;
+    }
+    const organizer = data.users.find((u) => u.email === "organizer@mgmcen.ac.in");
+    if (!organizer) {
+      data.users.push({
+        id: "usr_organizer_demo",
+        uid: "usr_organizer_demo",
+        name: "Event Coordinator",
+        email: "organizer@mgmcen.ac.in",
+        password: "organizer@mgm2026",
+        role: "organizer",
+        department: "Information Technology (IT)",
+        isActive: true,
+        isApproved: true,
+        createdAt: { toMillis: () => Date.now() - 86400000 * 3 }
+      });
+      needsSave = true;
+    }
+    if (needsSave) {
       saveStore(data);
     }
     return data;

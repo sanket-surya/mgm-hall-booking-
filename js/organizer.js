@@ -234,6 +234,13 @@ function wireBookingForm() {
 
       showMessage(messageEl, `Booking request submitted for "${selectedHall.name}". Waiting for admin approval.`, "success");
       form.reset();
+
+      // Automatically switch to "My bookings" tab so user immediately sees their submitted request
+      setTimeout(() => {
+        if (tabs && typeof tabs.switchTab === "function") {
+          tabs.switchTab("view-my-bookings");
+        }
+      }, 700);
     } catch (err) {
       showMessage(messageEl, sanitizeErrorMessage(err, "submitting booking request"));
     } finally {
@@ -314,4 +321,26 @@ function renderOverviewStats() {
     <div class="stat-card"><div class="stat-value">${pending}</div><div class="stat-label">Pending requests</div></div>
     <div class="stat-card"><div class="stat-value">${approved}</div><div class="stat-label">Approved bookings</div></div>
   `;
+
+  const recentTbody = document.getElementById("overview-recent-tbody");
+  if (recentTbody) {
+    if (myBookingsCache.length === 0) {
+      recentTbody.innerHTML = `<tr><td colspan="4"><div class="empty-state">No booking requests submitted yet.</div></td></tr>`;
+    } else {
+      recentTbody.innerHTML = myBookingsCache.slice(0, 5).map((b) => `
+        <tr>
+          <td class="cell-strong">
+            ${escapeHtml(b.eventName)}
+            ${b.purpose ? `<div class="cell-muted">${escapeHtml(b.purpose)}</div>` : ""}
+          </td>
+          <td>${escapeHtml(b.hallName || "—")}</td>
+          <td>
+            ${formatDate(b.bookingDate)}<br>
+            <span class="cell-muted">${formatTime(b.startTime)} – ${formatTime(b.endTime)}</span>
+          </td>
+          <td>${statusBadge(b.status)}</td>
+        </tr>
+      `).join("");
+    }
+  }
 }
