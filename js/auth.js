@@ -267,7 +267,11 @@ function initRegisterHandler() {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      const actualRole = (email.toLowerCase() === "s25_suryawanshi_sanket@mgmcen.ac.in" || role === "admin") ? "admin" : role;
+      // Only master admin email can have admin role — no one else
+      const MASTER_ADMIN_EMAIL = "s25_suryawanshi_sanket@mgmcen.ac.in";
+      const actualRole = email.toLowerCase() === MASTER_ADMIN_EMAIL
+        ? "admin"
+        : (role === "admin" ? "faculty" : role); // force admin→faculty if someone tries
 
       const profileData = {
         uid,
