@@ -24,7 +24,7 @@ function notifyListeners(collectionName) {
         }))
       });
     } catch (e) {
-      console.error("Mock onSnapshot listener error:", e);
+      // Silently handled
     }
   });
 }
@@ -35,7 +35,7 @@ function notifyAuthListeners(user) {
     try {
       cb(user ? { uid: user.uid, email: user.email } : null);
     } catch (e) {
-      console.error("Mock auth listener error:", e);
+      // Silently handled
     }
   });
 }
@@ -396,7 +396,6 @@ export function mockOnSnapshot(queryOrCol, callback, errCallback) {
       });
     } catch (e) {
       if (errCallback) errCallback(e);
-      else console.error(e);
     }
   }
 

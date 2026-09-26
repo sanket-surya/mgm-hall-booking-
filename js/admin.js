@@ -81,7 +81,7 @@ function listenUsers() {
     usersCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderUsersTable();
     renderOverviewStats();
-  }, (err) => console.error("users listener error:", err));
+  }, () => {});
 }
 
 function renderUsersTable() {
@@ -160,9 +160,8 @@ function renderUsersTable() {
       btn.disabled = true;
       try {
         await updateDoc(doc(db, "users", uid), { isActive: true, isApproved: true });
-        updateUserStatusInGoogleSheet(uid, email, "ACTIVE").catch(console.warn);
+        updateUserStatusInGoogleSheet(uid, email, "ACTIVE").catch(() => {});
       } catch (err) {
-        console.error("User approval error:", err);
         alert(sanitizeErrorMessage(err, "approving this user"));
       } finally {
         btn.disabled = false;
@@ -183,9 +182,8 @@ function renderUsersTable() {
       try {
         await updateDoc(doc(db, "users", uid), { isActive: makeActive, isApproved: true });
         // Sync status to Google Sheet
-        updateUserStatusInGoogleSheet(uid, email, makeActive ? "ACTIVE" : "DEACTIVATED").catch(console.warn);
+        updateUserStatusInGoogleSheet(uid, email, makeActive ? "ACTIVE" : "DEACTIVATED").catch(() => {});
       } catch (err) {
-        console.error("User status error:", err);
         alert(sanitizeErrorMessage(err, "updating user status"));
       } finally {
         btn.disabled = false;
@@ -213,9 +211,8 @@ function renderUsersTable() {
       try {
         await deleteDoc(doc(db, "users", uid));
         // Remove row directly from Google Sheet
-        removeUserFromGoogleSheet(uid, email).catch(console.warn);
+        removeUserFromGoogleSheet(uid, email).catch(() => {});
       } catch (err) {
-        console.error("User delete error:", err);
         alert(sanitizeErrorMessage(err, "removing this user"));
         btn.disabled = false;
       }
@@ -286,12 +283,11 @@ function wireCreateUserForm() {
         department,
         isActive: true,
         isApproved: true
-      }).catch(console.warn);
+      }).catch(() => {});
 
       showMessage(messageEl, `Account created for ${name}. Synced to Google Sheet.`, "success");
       form.reset();
     } catch (err) {
-      console.error("Create user error:", err);
       showMessage(messageEl, mapCreateUserError(err.code, err.message));
     } finally {
       submitBtn.disabled = false;
@@ -313,7 +309,7 @@ function listenHalls() {
     hallsCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderHallsGrid();
     renderOverviewStats();
-  }, (err) => console.error("halls listener error:", err));
+  }, () => {});
 }
 
 function renderHallsGrid() {
@@ -405,7 +401,6 @@ function wireHallForm() {
       }
       resetHallForm();
     } catch (err) {
-      console.error("Hall save error:", err);
       showMessage(messageEl, sanitizeErrorMessage(err, "saving the hall"));
     }
   });
@@ -418,7 +413,6 @@ async function deleteHall(hallId) {
   try {
     await deleteDoc(doc(db, "halls", hallId));
   } catch (err) {
-    console.error("Hall delete error:", err);
     alert(sanitizeErrorMessage(err, "deleting this hall"));
   }
 }
@@ -433,7 +427,7 @@ function listenBookings() {
     bookingsCache = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
     renderBookingsTable();
     renderOverviewStats();
-  }, (err) => console.error("bookings listener error:", err));
+  }, () => {});
 }
 
 function renderBookingsTable() {
@@ -495,9 +489,8 @@ async function approveBooking(bookingId) {
 
   try {
     await updateDoc(doc(db, "bookings", bookingId), { status: "approved", rejectionReason: "" });
-    updateGoogleSheetBookingStatus(bookingId, "approved").catch((e) => console.warn(e));
+    updateGoogleSheetBookingStatus(bookingId, "approved").catch(() => {});
   } catch (err) {
-    console.error("Booking approve error:", err);
     alert(sanitizeErrorMessage(err, "approving this booking"));
   }
 }
@@ -511,9 +504,8 @@ async function rejectBooking(bookingId) {
       status: "rejected",
       rejectionReason: cleanReason
     });
-    updateGoogleSheetBookingStatus(bookingId, "rejected", cleanReason).catch((e) => console.warn(e));
+    updateGoogleSheetBookingStatus(bookingId, "rejected", cleanReason).catch(() => {});
   } catch (err) {
-    console.error("Booking reject error:", err);
     alert(sanitizeErrorMessage(err, "rejecting this booking"));
   }
 }

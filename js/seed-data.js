@@ -69,12 +69,8 @@ export async function seedDefaultHalls() {
     if (existing.empty) {
       await addDoc(hallsRef, hall);
       added += 1;
-      console.log(`Added hall: ${hall.name}`);
-    } else {
-      console.log(`Skipped (already exists): ${hall.name}`);
     }
   }
 
-  console.log(`Done. ${added} hall(s) added.`);
   return added;
 }

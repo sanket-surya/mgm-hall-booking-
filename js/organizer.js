@@ -57,7 +57,7 @@ function listenHalls() {
     renderHallsGrid();
     populateHallSelect();
     renderOverviewStats();
-  }, (err) => console.error("Halls listener error:", err));
+  }, () => {});
 }
 
 function renderHallsGrid() {
@@ -230,12 +230,11 @@ function wireBookingForm() {
       sendBookingToGoogleSheet({
         id: docRef?.id || "",
         ...bookingData
-      }).catch((e) => console.warn("Google Sheet sync warning:", e));
+      }).catch(() => {});
 
       showMessage(messageEl, `Booking request submitted for "${selectedHall.name}". Waiting for admin approval.`, "success");
       form.reset();
     } catch (err) {
-      console.error("Booking error:", err);
       showMessage(messageEl, sanitizeErrorMessage(err, "submitting booking request"));
     } finally {
       submitBtn.disabled = false;
@@ -264,7 +263,7 @@ function listenMyBookings() {
 
     renderMyBookingsTable();
     renderOverviewStats();
-  }, (err) => console.error("My bookings listener error:", err));
+  }, () => {});
 }
 
 function renderMyBookingsTable() {

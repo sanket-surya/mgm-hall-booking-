@@ -61,7 +61,7 @@ export async function withSecondaryAuth(action) {
     try {
       await deleteApp(secondaryApp);
     } catch (err) {
-      console.warn("Could not delete secondary Firebase app:", err);
+      // Silently handled in production
     }
   }
 }

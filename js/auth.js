@@ -130,7 +130,6 @@ function initLoginHandler() {
       setSessionCookie("mgm_session_role", profile.role);
       window.location.replace(destination);
     } catch (err) {
-      console.error("Sign-in error:", err);
       showMessage(messageEl, sanitizeErrorMessage(err, "signing in"));
     } finally {
       setLoading(false);
@@ -241,7 +240,7 @@ function initRegisterHandler() {
         department,
         isActive: false,
         isApproved: false
-      }).catch(console.warn);
+      }).catch(() => {});
 
       // Sign out from immediate auth state so unapproved user cannot access dashboards
       await signOut(auth);
@@ -270,7 +269,6 @@ function initRegisterHandler() {
       );
 
     } catch (err) {
-      console.error("Registration error:", err);
       showMessage(messageEl, sanitizeErrorMessage(err, "registration"));
       submitBtn.disabled = false;
       submitBtn.textContent = "Register Account";

@@ -190,7 +190,7 @@ export function bindLogoutButtons() {
         }
         await signOut(auth);
       } catch (err) {
-        console.error("Sign-out error:", err);
+        // Silently handled
       } finally {
         window.location.href = "index.html";
       }

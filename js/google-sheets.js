@@ -21,10 +21,7 @@ export const GOOGLE_SHEETS_CONFIG = {
  */
 export async function sendBookingToGoogleSheet(booking) {
   const url = GOOGLE_SHEETS_CONFIG.webhookUrl?.trim();
-  if (!url) {
-    console.info("Google Sheets webhook URL is not configured yet. Skipping cloud sheet sync.");
-    return false;
-  }
+  if (!url) return false;
 
   const payload = {
     action: "add_booking",
@@ -50,10 +47,8 @@ export async function sendBookingToGoogleSheet(booking) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("Booking successfully synced to Google Sheet!");
     return true;
   } catch (err) {
-    console.warn("Could not sync to Google Sheet:", err);
     return false;
   }
 }
@@ -85,7 +80,7 @@ export async function updateGoogleSheetBookingStatus(bookingId, newStatus, reaso
       body: JSON.stringify(payload)
     });
   } catch (e) {
-    console.warn("Google Sheets status update warning:", e);
+    // Silently handled
   }
 }
 
@@ -179,10 +174,8 @@ export async function syncUserToGoogleSheet(user) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("User successfully synced to Google Sheet Users tab!");
     return true;
   } catch (err) {
-    console.warn("Could not sync user to Google Sheet:", err);
     return false;
   }
 }
@@ -214,7 +207,7 @@ export async function updateUserStatusInGoogleSheet(userId, email, status) {
       body: JSON.stringify(payload)
     });
   } catch (err) {
-    console.warn("Could not update user status in Google Sheet:", err);
+    // Silently handled
   }
 }
 
@@ -242,9 +235,8 @@ export async function removeUserFromGoogleSheet(userId, email) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log("User removed from Google Sheet.");
   } catch (err) {
-    console.warn("Could not remove user from Google Sheet:", err);
+    // Silently handled
   }
 }
 
