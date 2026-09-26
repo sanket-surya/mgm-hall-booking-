@@ -12,7 +12,7 @@ import {
 import {
   isAllowedCollegeEmail, showMessage, clearMessage, statusBadge,
   formatDate, formatTime, escapeHtml, timesOverlap,
-  bindLogoutButtons, initTabs
+  bindLogoutButtons, initTabs, sanitizeErrorMessage
 } from "./utils.js";
 import {
   exportBookingsToCSV,
@@ -162,7 +162,8 @@ function renderUsersTable() {
         await updateDoc(doc(db, "users", uid), { isActive: true, isApproved: true });
         updateUserStatusInGoogleSheet(uid, email, "ACTIVE").catch(console.warn);
       } catch (err) {
-        alert("Couldn't approve this user: " + err.message);
+        console.error("User approval error:", err);
+        alert(sanitizeErrorMessage(err, "approving this user"));
       } finally {
         btn.disabled = false;
       }
@@ -184,7 +185,8 @@ function renderUsersTable() {
         // Sync status to Google Sheet
         updateUserStatusInGoogleSheet(uid, email, makeActive ? "ACTIVE" : "DEACTIVATED").catch(console.warn);
       } catch (err) {
-        alert("Couldn't update this user: " + err.message);
+        console.error("User status error:", err);
+        alert(sanitizeErrorMessage(err, "updating user status"));
       } finally {
         btn.disabled = false;
       }
@@ -213,7 +215,8 @@ function renderUsersTable() {
         // Remove row directly from Google Sheet
         removeUserFromGoogleSheet(uid, email).catch(console.warn);
       } catch (err) {
-        alert("Couldn't remove user: " + err.message);
+        console.error("User delete error:", err);
+        alert(sanitizeErrorMessage(err, "removing this user"));
         btn.disabled = false;
       }
     });
@@ -288,6 +291,7 @@ function wireCreateUserForm() {
       showMessage(messageEl, `Account created for ${name}. Synced to Google Sheet.`, "success");
       form.reset();
     } catch (err) {
+      console.error("Create user error:", err);
       showMessage(messageEl, mapCreateUserError(err.code, err.message));
     } finally {
       submitBtn.disabled = false;
@@ -297,12 +301,7 @@ function wireCreateUserForm() {
 }
 
 function mapCreateUserError(code, fallback) {
-  switch (code) {
-    case "auth/email-already-in-use": return "An account with this email already exists.";
-    case "auth/invalid-email": return "That email address doesn't look right.";
-    case "auth/weak-password": return "Password is too weak — use at least 6 characters.";
-    default: return "Couldn't create the account: " + fallback;
-  }
+  return sanitizeErrorMessage({ code, message: fallback }, "creating account");
 }
 
 /* ---------------------------------------------------------------------- */
@@ -406,7 +405,8 @@ function wireHallForm() {
       }
       resetHallForm();
     } catch (err) {
-      showMessage(messageEl, "Couldn't save the hall: " + err.message);
+      console.error("Hall save error:", err);
+      showMessage(messageEl, sanitizeErrorMessage(err, "saving the hall"));
     }
   });
 }
@@ -418,7 +418,8 @@ async function deleteHall(hallId) {
   try {
     await deleteDoc(doc(db, "halls", hallId));
   } catch (err) {
-    alert("Couldn't delete this hall: " + err.message);
+    console.error("Hall delete error:", err);
+    alert(sanitizeErrorMessage(err, "deleting this hall"));
   }
 }
 
@@ -496,7 +497,8 @@ async function approveBooking(bookingId) {
     await updateDoc(doc(db, "bookings", bookingId), { status: "approved", rejectionReason: "" });
     updateGoogleSheetBookingStatus(bookingId, "approved").catch((e) => console.warn(e));
   } catch (err) {
-    alert("Couldn't approve this booking: " + err.message);
+    console.error("Booking approve error:", err);
+    alert(sanitizeErrorMessage(err, "approving this booking"));
   }
 }
 
@@ -511,7 +513,8 @@ async function rejectBooking(bookingId) {
     });
     updateGoogleSheetBookingStatus(bookingId, "rejected", cleanReason).catch((e) => console.warn(e));
   } catch (err) {
-    alert("Couldn't reject this booking: " + err.message);
+    console.error("Booking reject error:", err);
+    alert(sanitizeErrorMessage(err, "rejecting this booking"));
   }
 }
 

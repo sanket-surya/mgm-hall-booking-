@@ -17,7 +17,8 @@ import {
   clearMessage,
   setSessionCookie,
   getCookie,
-  deleteCookie
+  deleteCookie,
+  sanitizeErrorMessage
 } from "./utils.js";
 import { syncUserToGoogleSheet } from "./google-sheets.js";
 
@@ -129,7 +130,8 @@ function initLoginHandler() {
       setSessionCookie("mgm_session_role", profile.role);
       window.location.replace(destination);
     } catch (err) {
-      showMessage(messageEl, mapAuthError(err.code));
+      console.error("Sign-in error:", err);
+      showMessage(messageEl, sanitizeErrorMessage(err, "signing in"));
     } finally {
       setLoading(false);
     }
@@ -268,41 +270,20 @@ function initRegisterHandler() {
       );
 
     } catch (err) {
-      showMessage(messageEl, mapRegisterError(err.code, err.message));
+      console.error("Registration error:", err);
+      showMessage(messageEl, sanitizeErrorMessage(err, "registration"));
       submitBtn.disabled = false;
-      submitBtn.textContent = "Register & Access Dashboard";
+      submitBtn.textContent = "Register Account";
     }
   });
 }
 
 function mapRegisterError(code, fallback) {
-  switch (code) {
-    case "auth/email-already-in-use":
-      return "An account with this email address already exists. Please log in.";
-    case "auth/invalid-email":
-      return "That email address format is not valid.";
-    case "auth/weak-password":
-      return "Password is too weak. Please use at least 6 characters.";
-    default:
-      return fallback || "Couldn't complete registration. Please try again.";
-  }
+  return sanitizeErrorMessage({ code, message: fallback }, "registration");
 }
 
 function mapAuthError(code) {
-  switch (code) {
-    case "auth/invalid-email":
-      return "That email address doesn't look right.";
-    case "auth/user-not-found":
-    case "auth/wrong-password":
-    case "auth/invalid-credential":
-      return "Incorrect email or password.";
-    case "auth/too-many-requests":
-      return "Too many attempts. Please wait a moment and try again.";
-    case "auth/network-request-failed":
-      return "Network error. Check your connection and try again.";
-    default:
-      return "Couldn't sign in. Please try again.";
-  }
+  return sanitizeErrorMessage({ code }, "signing in");
 }
 
 /**

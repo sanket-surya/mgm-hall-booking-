@@ -239,3 +239,83 @@ export function initTabs(initialTarget) {
 
   return { switchTab };
 }
+
+/**
+ * Transforms technical exceptions, database failures, and network errors into clean, 
+ * user-friendly generic messages. Never exposes raw database names, internal traces,
+ * or raw technical jargon to the end user.
+ * 
+ * @param {any} err - The error object or string
+ * @param {string} [action="processing your request"] - Optional description of the action being attempted
+ * @returns {string} Clean user-facing error message
+ */
+export function sanitizeErrorMessage(err, action = "processing your request") {
+  if (!err) return `System issue: An unexpected error occurred while ${action}. Please try again later.`;
+
+  const msg = typeof err === "string" ? err : (err.message || "");
+  const code = (err.code || "").toLowerCase();
+  const lowerMsg = (msg + " " + code).toLowerCase();
+
+  // 1. Network / Connectivity Issues
+  if (
+    lowerMsg.includes("network") ||
+    lowerMsg.includes("fetch") ||
+    lowerMsg.includes("connection") ||
+    lowerMsg.includes("offline") ||
+    lowerMsg.includes("timeout") ||
+    code === "auth/network-request-failed" ||
+    code === "unavailable"
+  ) {
+    return "Network issue: Unable to connect to server. Please check your internet connection and try again.";
+  }
+
+  // 2. Permission / Authorization Issues
+  if (
+    lowerMsg.includes("permission-denied") ||
+    lowerMsg.includes("permission") ||
+    lowerMsg.includes("unauthorized")
+  ) {
+    return "Access issue: You do not have permission to perform this action. Please contact the administrator.";
+  }
+
+  // 3. User Authentication & Input Issues
+  if (
+    code === "auth/wrong-password" ||
+    code === "auth/user-not-found" ||
+    code === "auth/invalid-credential" ||
+    lowerMsg.includes("wrong password") ||
+    lowerMsg.includes("user not found")
+  ) {
+    return "Invalid credentials: Incorrect email address or password. Please try again.";
+  }
+
+  if (code === "auth/email-already-in-use" || lowerMsg.includes("already in use")) {
+    return "Account exists: An account with this college email already exists. Please log in.";
+  }
+
+  if (code === "auth/too-many-requests" || lowerMsg.includes("too many attempts")) {
+    return "Security notice: Too many attempts. Please wait a moment before trying again.";
+  }
+
+  if (code === "auth/invalid-email") {
+    return "Email format issue: Please provide a valid @mgmcen.ac.in college email address.";
+  }
+
+  if (code === "auth/weak-password") {
+    return "Password requirement: Password must be at least 6 characters long.";
+  }
+
+  // 4. College Hall Conflict or Explicit Business Logic
+  if (lowerMsg.includes("already has this hall booked")) {
+    return msg;
+  }
+  if (lowerMsg.includes("pending admin approval") || lowerMsg.includes("deactivated")) {
+    return msg;
+  }
+  if (lowerMsg.includes("can't deactivate your own account") || lowerMsg.includes("can't delete your own account")) {
+    return msg;
+  }
+
+  // 5. Default Generic System Issue (masks MongoDB, Firestore, SQL, fetch errors)
+  return `System issue: Unable to complete ${action}. Please try again in a few moments.`;
+}

@@ -10,7 +10,7 @@ import {
 } from "./firebase-config.js";
 import {
   showMessage, clearMessage, statusBadge, formatDate, formatTime,
-  escapeHtml, bindLogoutButtons, initTabs
+  escapeHtml, bindLogoutButtons, initTabs, sanitizeErrorMessage
 } from "./utils.js";
 import { sendBookingToGoogleSheet, exportBookingsToCSV } from "./google-sheets.js";
 
@@ -235,7 +235,8 @@ function wireBookingForm() {
       showMessage(messageEl, `Booking request submitted for "${selectedHall.name}". Waiting for admin approval.`, "success");
       form.reset();
     } catch (err) {
-      showMessage(messageEl, "Couldn't submit booking request: " + err.message);
+      console.error("Booking error:", err);
+      showMessage(messageEl, sanitizeErrorMessage(err, "submitting booking request"));
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = "Submit booking request";
