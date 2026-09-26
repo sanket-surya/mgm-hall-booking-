@@ -333,7 +333,55 @@ function listenHalls() {
 function renderHallsGrid() {
   const grid = document.getElementById("halls-grid");
   if (hallsCache.length === 0) {
-    grid.innerHTML = `<div class="empty-state">No halls yet. Add one below.</div>`;
+    grid.innerHTML = `
+      <div class="empty-state" style="padding: 24px; text-align: center;">
+        <p style="margin-bottom: 12px; font-size: 15px;">No halls yet in your live database.</p>
+        <button type="button" id="btn-seed-halls" class="btn btn-primary">
+          🏢 Add Default MGM Conference Halls
+        </button>
+      </div>`;
+    const seedBtn = document.getElementById("btn-seed-halls");
+    if (seedBtn) {
+      seedBtn.addEventListener("click", async () => {
+        seedBtn.disabled = true;
+        seedBtn.textContent = "Adding default halls…";
+        try {
+          const defaultHalls = [
+            {
+              name: "Sir Vishveshwaraiah Conference Hall",
+              description: "Main conference hall for large college events, seminars, and annual functions.",
+              capacity: 200,
+              location: "Main Block",
+              facilities: ["Projector", "Podium", "Sound system", "Air conditioning"],
+              isActive: true
+            },
+            {
+              name: "Conference Room A",
+              description: "Mid-sized room suited to departmental meetings and technical workshops.",
+              capacity: 40,
+              location: "Main Block",
+              facilities: ["Projector", "Whiteboard"],
+              isActive: true
+            },
+            {
+              name: "Conference Room B",
+              description: "Larger meeting room for seminars and guest lectures.",
+              capacity: 80,
+              location: "Main Block",
+              facilities: ["Projector", "Sound system"],
+              isActive: true
+            }
+          ];
+          for (const hall of defaultHalls) {
+            await addDoc(collection(db, "halls"), hall);
+          }
+        } catch (err) {
+          alert("Error adding halls: " + (err.message || err));
+          seedBtn.disabled = false;
+          seedBtn.textContent = "🏢 Add Default MGM Conference Halls";
+        }
+      });
+    }
     return;
   }
   grid.innerHTML = hallsCache.map((h) => `
