@@ -61,7 +61,7 @@ function getInitialData() {
         email: "s25_suryawanshi_sanket@mgmcen.ac.in",
         password: "sanket@mgm2026",
         role: "admin",
-        department: "Information Technology",
+        department: "Electronics & Telecommunication (ETC)",
         isActive: true,
         isApproved: true,
         createdAt: { toMillis: () => Date.now() - 86400000 * 7 }
