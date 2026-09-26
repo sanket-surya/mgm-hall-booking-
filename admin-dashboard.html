@@ -277,7 +277,7 @@
           <div class="table-wrap">
             <table>
               <thead>
-                <tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Actions</th></tr>
+                <tr><th>Name &amp; Staff ID</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Actions</th></tr>
               </thead>
               <tbody id="users-tbody">
                 <tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr>
@@ -314,21 +314,27 @@
                 </select>
               </div>
             </div>
-            <div class="field">
-              <label for="nu-department">Branch / Department</label>
-              <select id="nu-department" required>
-                <option value="" disabled selected>Select Branch</option>
-                <option value="Computer Science & Engineering (CSE)">Computer Science & Engineering (CSE)</option>
-                <option value="Information Technology (IT)">Information Technology (IT)</option>
-                <option value="AI & Data Science (AIDS)">AI & Data Science (AIDS)</option>
-                <option value="Electronics & Telecommunication (ETC)">Electronics & Telecommunication (ETC)</option>
-                <option value="Mechanical Engineering (MECH)">Mechanical Engineering (MECH)</option>
-                <option value="Civil Engineering (CIVIL)">Civil Engineering (CIVIL)</option>
-                <option value="Electrical Engineering (EE)">Electrical Engineering (EE)</option>
-                <option value="Applied Science & Humanities (ASH)">Applied Science & Humanities (ASH)</option>
-                <option value="Administration / Office">Administration / Office</option>
-                <option value="Other">Other</option>
-              </select>
+            <div class="field-row">
+              <div class="field">
+                <label for="nu-emp-id">Employee / Staff ID</label>
+                <input type="text" id="nu-emp-id" placeholder="e.g. MGM/EMP/2024/001" />
+              </div>
+              <div class="field">
+                <label for="nu-department">Branch / Department</label>
+                <select id="nu-department" required>
+                  <option value="" disabled selected>Select Branch</option>
+                  <option value="Computer Science & Engineering (CSE)">Computer Science & Engineering (CSE)</option>
+                  <option value="Information Technology (IT)">Information Technology (IT)</option>
+                  <option value="AI & Data Science (AIDS)">AI & Data Science (AIDS)</option>
+                  <option value="Electronics & Telecommunication (ETC)">Electronics & Telecommunication (ETC)</option>
+                  <option value="Mechanical Engineering (MECH)">Mechanical Engineering (MECH)</option>
+                  <option value="Civil Engineering (CIVIL)">Civil Engineering (CIVIL)</option>
+                  <option value="Electrical Engineering (EE)">Electrical Engineering (EE)</option>
+                  <option value="Applied Science & Humanities (ASH)">Applied Science & Humanities (ASH)</option>
+                  <option value="Administration / Office">Administration / Office</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary">Create account</button>
             <p class="field-hint">Share the temporary password with the user directly — it is not shown or stored anywhere else. They should be encouraged to change it after logging in via Firebase's password reset.</p>

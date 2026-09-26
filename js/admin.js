@@ -146,7 +146,10 @@ function renderUsersTable() {
 
     return `
       <tr style="${u.isActive === false && u.isApproved === false ? 'background:#fffdf5;' : ''}">
-        <td class="cell-strong">${escapeHtml(u.name || "—")}</td>
+        <td class="cell-strong">
+          ${escapeHtml(u.name || "—")}
+          ${u.employeeId ? `<br><span class="badge badge-info" style="font-size:11px; padding:2px 6px; font-weight:600;">ID: ${escapeHtml(u.employeeId)}</span>` : '<br><span style="font-size:11px; color:#9ca3af;">(No Staff ID)</span>'}
+        </td>
         <td>${escapeHtml(u.email || "—")}</td>
         <td style="text-transform:capitalize">${escapeHtml(u.role || "—")}</td>
         <td>${escapeHtml(u.department || "—")}</td>
@@ -245,6 +248,7 @@ function wireCreateUserForm() {
     const password = document.getElementById("nu-password").value;
     const role = document.getElementById("nu-role").value;
     const department = document.getElementById("nu-department").value.trim();
+    const employeeId = (document.getElementById("nu-emp-id")?.value || "").trim();
 
     if (!name) {
       showMessage(messageEl, "Name is required.");
@@ -280,6 +284,7 @@ function wireCreateUserForm() {
           name,
           role,
           department,
+          employeeId,
           isActive: true,
           isApproved: true,
           createdAt: serverTimestamp()
@@ -293,6 +298,7 @@ function wireCreateUserForm() {
         name,
         role,
         department,
+        employeeId,
         isActive: true,
         isApproved: true
       }).catch(() => {});

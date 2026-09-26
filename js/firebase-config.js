@@ -102,6 +102,17 @@ export async function createUserWithEmailAndPassword(authInst, email, password) 
   return mod.createUserWithEmailAndPassword(authInst, email, password);
 }
 
+export async function sendEmailVerification(user) {
+  if (isMockMode) return true;
+  try {
+    const mod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    return await mod.sendEmailVerification(user);
+  } catch (e) {
+    console.warn("sendEmailVerification notice:", e);
+    return false;
+  }
+}
+
 // --------------------------------------------------------------------------
 // Firestore Delegation
 // --------------------------------------------------------------------------

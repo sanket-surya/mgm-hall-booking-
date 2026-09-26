@@ -17,6 +17,14 @@
     <h1>Sir Vishveshwaraiah Conference Hall Booking System</h1>
     <span class="subtitle">MGM's College of Engineering, Nanded</span>
 
+    <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:10px 12px; margin-bottom:16px; font-size:12px; color:#991b1b; display:flex; align-items:flex-start; gap:8px;">
+      <span style="font-size:16px; line-height:1;">🛡️</span>
+      <div>
+        <strong>Official College Portal — Faculty &amp; Staff Only</strong><br>
+        Student booking or access is strictly prohibited. All activities are monitored.
+      </div>
+    </div>
+
     <div id="login-message" class="form-message error" hidden></div>
 
     <div class="auth-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--color-border); padding-bottom: 12px;">
@@ -27,7 +35,7 @@
     <!-- SIGN IN FORM -->
     <form id="login-form" novalidate>
       <div class="field">
-        <label for="email">College email</label>
+        <label for="email">College staff email</label>
         <input type="email" id="email" name="email" placeholder="name@mgmcen.ac.in" autocomplete="username" required />
       </div>
       <div class="field">
@@ -37,10 +45,10 @@
       <button type="submit" class="btn btn-primary btn-block">Log in</button>
     </form>
 
-    <!-- REGISTER FORM (Faculty / Organizer ONLY — Students NOT allowed) -->
+    <!-- REGISTER FORM (Faculty / Organizer) -->
     <form id="register-form" hidden novalidate>
-      <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; padding:10px 14px; margin-bottom:14px; font-size:13px; color:#991b1b;">
-        ⚠️ <strong>Faculty / Staff Only</strong> — Students are NOT authorized to register. Unauthorized registrations will be rejected by the Admin.
+      <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:9px 12px; margin-bottom:14px; font-size:12px; color:#92400e;">
+        ⚠️ <strong>Faculty Verification:</strong> All registrations require an official <strong>Employee / Staff ID</strong> and must be approved by the College Admin before first login.
       </div>
       <div class="field">
         <label for="reg-name">Full name</label>
@@ -49,7 +57,7 @@
       <div class="field">
         <label for="reg-email">College staff email</label>
         <input type="email" id="reg-email" placeholder="username@mgmcen.ac.in" required />
-        <span style="font-size:11px; color:var(--color-ink-faint);">Only official college staff emails accepted</span>
+        <span style="font-size:11px; color:var(--color-ink-faint);">Official college staff email only (Students blocked)</span>
       </div>
       <div class="field-row">
         <div class="field">
@@ -77,18 +85,19 @@
         </div>
       </div>
       <div class="field">
+        <label for="reg-emp-id">Employee / Staff ID <span style="color:#dc2626;">*</span></label>
+        <input type="text" id="reg-emp-id" placeholder="e.g. MGM/EMP/2024/001" required />
+        <span style="font-size:11px; color:var(--color-ink-faint);">Official MGM Employee / Faculty code (Required to prevent student signups)</span>
+      </div>
+      <div class="field">
         <label for="reg-password">Password</label>
         <input type="password" id="reg-password" placeholder="Min 6 characters" minlength="6" required />
       </div>
-      <div class="field">
-        <label for="reg-emp-id">Employee / Staff ID (optional)</label>
-        <input type="text" id="reg-emp-id" placeholder="e.g. MGM/CSE/2024/001" />
-      </div>
       <button type="submit" class="btn btn-primary btn-block">Register Account</button>
-      <p class="field-hint" style="margin-top: 8px; text-align: center; color: var(--color-ink-faint);">🔒 New accounts require Admin verification & approval before first login.</p>
+      <p class="field-hint" style="margin-top: 8px; text-align: center; color: var(--color-ink-faint);">🔒 Note: New accounts require Admin approval before first login.</p>
     </form>
 
-    <p class="login-footnote" id="login-footnote">🔐 Access restricted to authorized college faculty & staff only.<br>Student access is <strong>not permitted</strong>. Domain: <code>@mgmcen.ac.in</code></p>
+    <p class="login-footnote" id="login-footnote">🔐 <strong>Security Policy:</strong> Access restricted to authorized college faculty &amp; staff.<br>Student registration is <strong>prohibited</strong>. Allowed domain: <code>@mgmcen.ac.in</code></p>
   </div>
 </div>
 

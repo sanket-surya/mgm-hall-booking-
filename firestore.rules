@@ -38,12 +38,23 @@ service cloud.firestore {
     }
 
     // ---- users --------------------------------------------------------
-    // Any authenticated user can read the directory (needed so faculty and
-    // organizers can be looked up); only an admin can create, edit, or
-    // deactivate an account.
+    // - Any authenticated user can read directory profiles.
+    // - A newly registered user can ONLY create their own profile document,
+    //   and it MUST start out unapproved (isActive: false, isApproved: false).
+    //   They cannot grant themselves 'admin' role, and must have a college domain email.
+    // - Only an admin can approve/activate accounts, change roles, or delete users.
     match /users/{userId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow create: if isSignedIn()
+                    && (isAdmin() || (
+                      request.auth.uid == userId
+                      && request.resource.data.isActive == false
+                      && request.resource.data.isApproved == false
+                      && request.resource.data.role in ['faculty', 'organizer']
+                      && request.auth.token.email.matches('.*@(mgmcen|mgmce|mgmnanded)\\.ac\\.in')
+                    ));
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // ---- halls ----------------------------------------------------------

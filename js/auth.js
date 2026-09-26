@@ -7,18 +7,21 @@ import {
   auth, db,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut,
   doc, getDoc, setDoc, serverTimestamp
 } from "./firebase-config.js";
 import {
   isAllowedCollegeEmail,
+  isLikelyStudentEmail,
   showMessage,
   clearMessage,
   setSessionCookie,
   getCookie,
   deleteCookie,
-  sanitizeErrorMessage
+  sanitizeErrorMessage,
+  escapeHtml
 } from "./utils.js";
 import { syncUserToGoogleSheet } from "./google-sheets.js";
 
@@ -45,7 +48,14 @@ export function initLoginForm() {
   const activeRole = getCookie("mgm_session_role");
   const messageEl = document.getElementById("login-message");
 
-  if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole] && messageEl) {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("timeout") === "true" && messageEl) {
+    showMessage(
+      messageEl,
+      "⚠️ Your session expired after 30 minutes of inactivity. Please log in again for security.",
+      "warning"
+    );
+  } else if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole] && messageEl) {
     messageEl.className = "form-message info";
     messageEl.hidden = false;
     messageEl.innerHTML = `You are currently signed in as <strong>${escapeHtml(activeRole.toUpperCase())}</strong>. <a href="${ROLE_DASHBOARDS[activeRole]}" style="font-weight:600; text-decoration:underline; margin-left:6px;">Go to Dashboard →</a>`;
@@ -187,7 +197,6 @@ function initRegisterHandler() {
     const role = roleInput.value;
     const department = deptInput.value.trim();
     const password = passwordInput.value;
-    const empId = (document.getElementById("reg-emp-id")?.value || "").trim();
 
     if (!name) {
       showMessage(messageEl, "Please enter your full name.");
@@ -195,6 +204,18 @@ function initRegisterHandler() {
     }
     if (!isAllowedCollegeEmail(email)) {
       showMessage(messageEl, "Please register with your college email address (@mgmcen.ac.in).");
+      return;
+    }
+    if (isLikelyStudentEmail(email)) {
+      showMessage(
+        messageEl,
+        `🚫 Access Denied: Student email pattern detected (${escapeHtml(email)}). Sir Vishveshwaraiah Conference Hall booking is strictly restricted to Faculty & Staff members only.`
+      );
+      return;
+    }
+    const empId = (document.getElementById("reg-emp-id")?.value || "").trim();
+    if (!empId || empId.length < 3) {
+      showMessage(messageEl, "Please enter your official College Employee / Staff ID.");
       return;
     }
     if (!department) {
@@ -225,6 +246,9 @@ function initRegisterHandler() {
         createdAt: serverTimestamp()
       });
 
+      // Send Firebase Email Verification to the user's official college inbox
+      sendEmailVerification(cred.user).catch(() => {});
+
       // Instantly sync newly registered user into Google Sheet "Users" tab as PENDING_APPROVAL
       syncUserToGoogleSheet({
         uid,
@@ -232,6 +256,7 @@ function initRegisterHandler() {
         name,
         role,
         department,
+        employeeId: empId,
         isActive: false,
         isApproved: false
       }).catch(() => {});
@@ -258,7 +283,7 @@ function initRegisterHandler() {
 
       showMessage(
         messageEl,
-        "✅ Registration submitted! Your account is pending Admin approval. You can log in once the College Admin approves your account.",
+        "✅ Registration submitted! Your account is pending Admin approval. You can log in once the College Admin verifies your Staff ID and approves your account.",
         "success"
       );
 
@@ -343,7 +368,7 @@ export function requireRole(expectedRole) {
           window.location.replace("index.html?timeout=true");
         }, SESSION_TIMEOUT);
       }
-      ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach(evt => {
+      ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach((evt) => {
         document.addEventListener(evt, resetTimer, { passive: true });
       });
       resetTimer();

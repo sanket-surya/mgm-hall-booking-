@@ -19,6 +19,37 @@ export function isAllowedCollegeEmail(email) {
 }
 
 /**
+ * Checks whether an email address likely belongs to a student rather than faculty/staff.
+ * Students typically have admission year prefixes (e.g. 2021..., 2022...),
+ * roll numbers/PRNs (e.g. 2022bcs045, btech_101), 3+ consecutive numbers, or student keywords.
+ * @param {string} email
+ * @returns {boolean}
+ */
+export function isLikelyStudentEmail(email) {
+  if (!email || typeof email !== "string") return false;
+  const clean = email.trim().toLowerCase();
+
+  // Explicitly permit the admin email
+  if (clean === "s25_suryawanshi_sanket@mgmcen.ac.in") return false;
+
+  const local = clean.split("@")[0] || "";
+
+  // 1. Admission year patterns: starts with 201x, 202x, 203x followed by letters/digits (e.g. 2022bcs045)
+  if (/^20(1\d|2\d)\w+/i.test(local)) return true;
+
+  // 2. Explicit student keywords
+  if (/(student|stud\.|stud_|\.stud|btech|mtech|polytechnic|diploma|intern)/i.test(local)) return true;
+
+  // 3. Roll number / PRN patterns (e.g. 3 or more digits attached to branch code like bcs001, me045)
+  if (/([a-z]{2,4}\d{3,})/i.test(local) && !clean.includes("admin")) return true;
+
+  // 4. Starts directly with 4 or more digits (e.g. 123456@...)
+  if (/^\d{4,}/.test(local)) return true;
+
+  return false;
+}
+
+/**
  * Displays a styled message inside a target element.
  * @param {HTMLElement} el
  * @param {string} text
