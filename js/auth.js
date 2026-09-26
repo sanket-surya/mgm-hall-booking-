@@ -41,23 +41,15 @@ export async function getUserProfile(uid) {
 
 /** Wires up both login and registration forms on index.html. */
 export function initLoginForm() {
-  function checkAndRedirectActiveSession() {
-    const activeUid = getCookie("mgm_session_uid") || getCookie("mgm_current_user_id");
-    const activeRole = getCookie("mgm_session_role");
-    if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole]) {
-      window.location.replace(ROLE_DASHBOARDS[activeRole]);
-      return true;
-    }
-    return false;
+  const activeUid = getCookie("mgm_session_uid") || getCookie("mgm_current_user_id");
+  const activeRole = getCookie("mgm_session_role");
+  const messageEl = document.getElementById("login-message");
+
+  if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole] && messageEl) {
+    messageEl.className = "form-message info";
+    messageEl.hidden = false;
+    messageEl.innerHTML = `You are currently signed in as <strong>${escapeHtml(activeRole.toUpperCase())}</strong>. <a href="${ROLE_DASHBOARDS[activeRole]}" style="font-weight:600; text-decoration:underline; margin-left:6px;">Go to Dashboard →</a>`;
   }
-
-  // Check immediately
-  if (checkAndRedirectActiveSession()) return;
-
-  // Handle bfcache when browser back/forward is used
-  window.addEventListener("pageshow", () => {
-    checkAndRedirectActiveSession();
-  });
 
   initLoginHandler();
   initRegisterTabs();
@@ -292,9 +284,9 @@ function mapAuthError(code) {
  */
 export function requireRole(expectedRole) {
   return new Promise((resolve) => {
-    // Fast path: if session cookie role mismatches expected dashboard, redirect
+    // Fast path: if session cookie role mismatches expected dashboard, redirect (unless admin)
     const cookieRole = getCookie("mgm_session_role");
-    if (cookieRole && cookieRole !== expectedRole && ROLE_DASHBOARDS[cookieRole]) {
+    if (cookieRole && cookieRole !== expectedRole && cookieRole !== "admin" && ROLE_DASHBOARDS[cookieRole]) {
       window.location.replace(ROLE_DASHBOARDS[cookieRole]);
       return;
     }
@@ -327,7 +319,7 @@ export function requireRole(expectedRole) {
         return;
       }
 
-      if (profile.role !== expectedRole) {
+      if (profile.role !== expectedRole && profile.role !== "admin") {
         setSessionCookie("mgm_session_role", profile.role);
         window.location.replace(ROLE_DASHBOARDS[profile.role] || "index.html");
         return;

@@ -21,6 +21,7 @@ import {
   updateUserStatusInGoogleSheet,
   removeUserFromGoogleSheet,
   exportUsersToCSV,
+  sendBookingToGoogleSheet,
   GOOGLE_SHEETS_CONFIG
 } from "./google-sheets.js";
 
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   wireCreateUserForm();
   wireHallForm();
+  wireAdminBookingForm();
   document.getElementById("user-role-filter").addEventListener("change", renderUsersTable);
   document.getElementById("booking-status-filter").addEventListener("change", renderBookingsTable);
 
@@ -349,6 +351,14 @@ function renderHallsGrid() {
   grid.querySelectorAll("[data-delete-hall]").forEach((btn) => {
     btn.addEventListener("click", () => deleteHall(btn.getAttribute("data-delete-hall")));
   });
+
+  const adminHallSelect = document.getElementById("admin-bk-hall");
+  if (adminHallSelect) {
+    const activeHalls = hallsCache.filter((h) => h.isActive !== false);
+    adminHallSelect.innerHTML = activeHalls.length
+      ? activeHalls.map((h) => `<option value="${escapeHtml(h.id)}">${escapeHtml(h.name)} (Capacity: ${h.capacity})</option>`).join("")
+      : '<option value="">No active halls available</option>';
+  }
 }
 
 function startEditHall(hallId) {
@@ -425,6 +435,116 @@ async function deleteHall(hallId) {
   } catch (err) {
     alert(sanitizeErrorMessage(err, "deleting this hall"));
   }
+}
+
+function wireAdminBookingForm() {
+  const form = document.getElementById("admin-booking-form");
+  if (!form) return;
+  const messageEl = document.getElementById("admin-booking-message");
+
+  const dateInput = document.getElementById("admin-bk-date");
+  if (dateInput) {
+    dateInput.min = new Date().toISOString().split("T")[0];
+    dateInput.addEventListener("click", () => {
+      try { dateInput.showPicker(); } catch (e) {}
+    });
+  }
+
+  document.querySelectorAll("[data-admin-slot]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const [start, end] = btn.dataset.adminSlot.split("-");
+      const sSelect = document.getElementById("admin-bk-start");
+      const eSelect = document.getElementById("admin-bk-end");
+      if (sSelect && eSelect) {
+        sSelect.value = start;
+        eSelect.value = end;
+      }
+    });
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearMessage(messageEl);
+
+    const hallId = document.getElementById("admin-bk-hall").value;
+    const bookingDate = document.getElementById("admin-bk-date").value;
+    const startTime = document.getElementById("admin-bk-start").value;
+    const endTime = document.getElementById("admin-bk-end").value;
+    const eventName = document.getElementById("admin-bk-event-name").value.trim();
+    const purpose = document.getElementById("admin-bk-purpose").value.trim();
+    const attendees = Number(document.getElementById("admin-bk-attendees").value);
+
+    if (!hallId) return showMessage(messageEl, "Please select a conference hall.");
+    if (!bookingDate) return showMessage(messageEl, "Please select a date.");
+    if (!startTime || !endTime) return showMessage(messageEl, "Please specify both start and end times.");
+    if (startTime >= endTime) return showMessage(messageEl, "End time must be after start time.");
+    if (!eventName) return showMessage(messageEl, "Please enter an event name.");
+    if (!purpose) return showMessage(messageEl, "Please enter event purpose.");
+    if (isNaN(attendees) || attendees < 1) return showMessage(messageEl, "Attendees must be at least 1.");
+
+    const hall = hallsCache.find((h) => h.id === hallId);
+    if (!hall) return showMessage(messageEl, "Selected hall is unavailable.");
+
+    // Conflict check against already approved bookings
+    const conflict = bookingsCache.find((b) =>
+      b.hallId === hallId &&
+      b.bookingDate === bookingDate &&
+      b.status === "approved" &&
+      timesOverlap(startTime, endTime, b.startTime, b.endTime)
+    );
+    if (conflict) {
+      return showMessage(
+        messageEl,
+        `Conflict: "${conflict.eventName}" already booked on ${formatDate(bookingDate)} from ${formatTime(conflict.startTime)} to ${formatTime(conflict.endTime)}.`
+      );
+    }
+
+    const submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Booking hall…";
+
+    try {
+      const bookingData = {
+        userId: currentProfile.uid,
+        userName: currentProfile.name || currentProfile.email,
+        userEmail: currentProfile.email,
+        department: currentProfile.department || "Administration",
+        hallId: hall.id,
+        hallName: hall.name,
+        bookingDate,
+        startTime,
+        endTime,
+        eventName,
+        purpose,
+        expectedAttendees: attendees,
+        status: "approved",
+        rejectionReason: ""
+      };
+
+      const docRef = await addDoc(collection(db, "bookings"), {
+        ...bookingData,
+        createdAt: serverTimestamp()
+      });
+
+      sendBookingToGoogleSheet({
+        id: docRef?.id || "",
+        ...bookingData
+      }).catch(() => {});
+
+      showMessage(messageEl, `Booking confirmed and approved for "${hall.name}"!`, "success");
+      form.reset();
+
+      setTimeout(() => {
+        const bookingsBtn = document.querySelector('button[data-tab-target="view-bookings"]');
+        if (bookingsBtn) bookingsBtn.click();
+      }, 700);
+    } catch (err) {
+      showMessage(messageEl, sanitizeErrorMessage(err, "booking hall"));
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Book Hall Now (Direct Approval)";
+    }
+  });
 }
 
 /* ---------------------------------------------------------------------- */

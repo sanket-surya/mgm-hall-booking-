@@ -21,6 +21,7 @@
     <nav class="sidebar-nav">
       <button data-tab-target="view-overview" class="active">Dashboard</button>
       <button data-tab-target="view-halls">Halls</button>
+      <button data-tab-target="view-book">Book a hall</button>
       <button data-tab-target="view-bookings" id="nav-bookings-btn">Bookings</button>
       <button data-tab-target="view-users">Users</button>
       <button data-logout>Log out</button>
@@ -113,6 +114,112 @@
               <button type="submit" class="btn btn-primary">Save hall</button>
               <button type="button" id="hall-cancel-edit" class="btn btn-secondary hidden">Cancel edit</button>
             </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ BOOK A HALL (ADMIN DIRECT BOOKING) ============ -->
+      <section id="view-book" class="view">
+        <div class="view-header"><h2>Book a hall (Admin Direct Booking)</h2></div>
+        <div class="panel">
+          <div id="admin-booking-message" class="form-message error" hidden></div>
+          <form id="admin-booking-form">
+            <div class="field-row">
+              <div class="field">
+                <label for="admin-bk-hall">Hall</label>
+                <select id="admin-bk-hall" required></select>
+              </div>
+              <div class="field">
+                <label for="admin-bk-date">Date</label>
+                <input type="date" id="admin-bk-date" required />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="admin-bk-start">Start time</label>
+                <select id="admin-bk-start" required>
+                  <option value="">Select start time…</option>
+                  <option value="08:00">08:00 AM</option>
+                  <option value="08:30">08:30 AM</option>
+                  <option value="09:00">09:00 AM</option>
+                  <option value="09:30">09:30 AM</option>
+                  <option value="10:00" selected>10:00 AM</option>
+                  <option value="10:30">10:30 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="11:30">11:30 AM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="12:30">12:30 PM</option>
+                  <option value="13:00">01:00 PM</option>
+                  <option value="13:30">01:30 PM</option>
+                  <option value="14:00">02:00 PM</option>
+                  <option value="14:30">02:30 PM</option>
+                  <option value="15:00">03:00 PM</option>
+                  <option value="15:30">03:30 PM</option>
+                  <option value="16:00">04:00 PM</option>
+                  <option value="16:30">04:30 PM</option>
+                  <option value="17:00">05:00 PM</option>
+                  <option value="17:30">05:30 PM</option>
+                  <option value="18:00">06:00 PM</option>
+                  <option value="18:30">06:30 PM</option>
+                  <option value="19:00">07:00 PM</option>
+                  <option value="19:30">07:30 PM</option>
+                  <option value="20:00">08:00 PM</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="admin-bk-end">End time</label>
+                <select id="admin-bk-end" required>
+                  <option value="">Select end time…</option>
+                  <option value="08:30">08:30 AM</option>
+                  <option value="09:00">09:00 AM</option>
+                  <option value="09:30">09:30 AM</option>
+                  <option value="10:00">10:00 AM</option>
+                  <option value="10:30">10:30 AM</option>
+                  <option value="11:00">11:00 AM</option>
+                  <option value="11:30">11:30 AM</option>
+                  <option value="12:00" selected>12:00 PM</option>
+                  <option value="12:30">12:30 PM</option>
+                  <option value="13:00">01:00 PM</option>
+                  <option value="13:30">01:30 PM</option>
+                  <option value="14:00">02:00 PM</option>
+                  <option value="14:30">02:30 PM</option>
+                  <option value="15:00">03:00 PM</option>
+                  <option value="15:30">03:30 PM</option>
+                  <option value="16:00">04:00 PM</option>
+                  <option value="16:30">04:30 PM</option>
+                  <option value="17:00">05:00 PM</option>
+                  <option value="17:30">05:30 PM</option>
+                  <option value="18:00">06:00 PM</option>
+                  <option value="18:30">06:30 PM</option>
+                  <option value="19:00">07:00 PM</option>
+                  <option value="19:30">07:30 PM</option>
+                  <option value="20:00">08:00 PM</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-top: -6px; margin-bottom: 16px;">
+              <span class="field-hint" style="display:block; margin-bottom:6px;">⚡ Quick Slot Presets (१-क्लिक स्लॉट्स):</span>
+              <div class="inline-actions" style="gap: 8px;">
+                <button type="button" class="btn btn-sm btn-secondary" data-admin-slot="10:00-12:00">10:00 AM – 12:00 PM</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-admin-slot="13:00-15:00">01:00 PM – 03:00 PM</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-admin-slot="10:00-17:00">All Day (10 AM – 5 PM)</button>
+                <button type="button" class="btn btn-sm btn-secondary" data-admin-slot="16:00-17:00">04:00 PM – 05:00 PM</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="admin-bk-event-name">Event name</label>
+              <input type="text" id="admin-bk-event-name" placeholder="e.g. Annual College Day / Technical Conference" required />
+            </div>
+            <div class="field">
+              <label for="admin-bk-purpose">Purpose of event</label>
+              <textarea id="admin-bk-purpose" placeholder="Description of the event" required></textarea>
+            </div>
+            <div class="field">
+              <label for="admin-bk-attendees">Expected attendees</label>
+              <input type="number" id="admin-bk-attendees" min="1" required />
+            </div>
+            <button type="submit" class="btn btn-primary">Book Hall Now (Direct Approval)</button>
+            <p class="field-hint">As Admin, your booking is automatically approved and reserved immediately.</p>
           </form>
         </div>
       </section>
