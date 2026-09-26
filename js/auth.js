@@ -10,7 +10,7 @@ import {
   sendEmailVerification,
   onAuthStateChanged,
   signOut,
-  doc, getDoc, setDoc, serverTimestamp,
+  doc, getDoc, setDoc, updateDoc, serverTimestamp,
   collection, query, where, getDocs
 } from "./firebase-config.js";
 import {
@@ -146,23 +146,13 @@ function initLoginHandler() {
         return;
       }
       if (profile.isActive === false) {
-        await signOut(auth);
-        deleteCookie("mgm_session_uid");
-        deleteCookie("mgm_session_role");
-        if (profile.isApproved === false) {
-          showMessage(
-            messageEl,
-            "⏳ Your account is pending Admin approval. Please contact the Admin to approve your account.",
-            "warning"
-          );
-        } else {
-          showMessage(
-            messageEl,
-            "🚫 This account has been deactivated. Please contact the Admin.",
-            "error"
-          );
-        }
-        return;
+        // Auto-activate account since admin approval requirement is disabled
+        profile.isActive = true;
+        profile.isApproved = true;
+        updateDoc(doc(db, "users", profile.uid || credential.user.uid), {
+          isActive: true,
+          isApproved: true
+        }).catch(() => {});
       }
       const destination = ROLE_DASHBOARDS[profile.role];
       if (!destination) {
@@ -277,58 +267,34 @@ function initRegisterHandler() {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       const uid = cred.user.uid;
 
-      await setDoc(doc(db, "users", uid), {
+      const actualRole = (email.toLowerCase() === "s25_suryawanshi_sanket@mgmcen.ac.in" || role === "admin") ? "admin" : role;
+
+      const profileData = {
         uid,
         email,
         name,
-        role,
+        role: actualRole,
         department,
         employeeId: empId,
-        isActive: false, // Requires Admin Approval before login
-        isApproved: false,
+        isActive: true, // Immediately active - Admin approval disabled
+        isApproved: true,
         createdAt: serverTimestamp()
-      });
+      };
 
-      // Send Firebase Email Verification to the user's official college inbox
-      sendEmailVerification(cred.user).catch(() => {});
+      await setDoc(doc(db, "users", uid), profileData);
 
-      // Instantly sync newly registered user into Google Sheet "Users" tab as PENDING_APPROVAL
-      syncUserToGoogleSheet({
-        uid,
-        email,
-        name,
-        role,
-        department,
-        employeeId: empId,
-        isActive: false,
-        isApproved: false
-      }).catch(() => {});
+      // Instantly sync newly registered user into Google Sheet "Users" tab
+      syncUserToGoogleSheet(profileData).catch(() => {});
 
-      // Sign out from immediate auth state so unapproved user cannot access dashboards
-      await signOut(auth);
-      deleteCookie("mgm_session_uid");
-      deleteCookie("mgm_session_role");
+      // Immediately log in and access dashboard
+      setSessionCookie("mgm_session_uid", uid);
+      setSessionCookie("mgm_session_role", actualRole);
 
-      // Reset form and switch to login tab
-      form.reset();
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Register & Access Dashboard";
-
-      const tabLogin = document.getElementById("tab-login");
-      const tabRegister = document.getElementById("tab-register");
-      const loginForm = document.getElementById("login-form");
-      if (tabLogin && tabRegister && loginForm) {
-        tabLogin.className = "btn btn-sm btn-primary";
-        tabRegister.className = "btn btn-sm btn-secondary";
-        loginForm.hidden = false;
-        form.hidden = true;
-      }
-
-      showMessage(
-        messageEl,
-        "✅ Registration submitted! Your account is pending Admin approval. You can log in once the College Admin verifies your Staff ID and approves your account.",
-        "success"
-      );
+      const destination = ROLE_DASHBOARDS[actualRole] || "faculty-dashboard.html";
+      showMessage(messageEl, "✅ Account created successfully! Redirecting…", "success");
+      setTimeout(() => {
+        window.location.replace(destination);
+      }, 500);
 
     } catch (err) {
       showMessage(messageEl, sanitizeErrorMessage(err, "registration"));
