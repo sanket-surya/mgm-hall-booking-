@@ -191,6 +191,10 @@ function wireCreateUserForm() {
       showMessage(messageEl, "Use a college email address (@mgmcen.ac.in).");
       return;
     }
+    if (!department) {
+      showMessage(messageEl, "Please select a branch / department.");
+      return;
+    }
     if (password.length < 6) {
       showMessage(messageEl, "Password must be at least 6 characters (Firebase Auth minimum).");
       return;

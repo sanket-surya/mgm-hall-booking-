@@ -162,6 +162,10 @@ function initRegisterHandler() {
       showMessage(messageEl, "Please register with your college email address (@mgmcen.ac.in).");
       return;
     }
+    if (!department) {
+      showMessage(messageEl, "Please select your branch / department.");
+      return;
+    }
     if (password.length < 6) {
       showMessage(messageEl, "Password must be at least 6 characters.");
       return;
