@@ -122,20 +122,63 @@ function saveStore(data) {
   }
 }
 
+// --------------------------------------------------------------------------
+// Session Cookie Helpers (Standard browser session cookies)
+// --------------------------------------------------------------------------
+
+function setSessionCookie(name, value) {
+  if (typeof document !== "undefined") {
+    // Cookie without expires or max-age is a true SESSION COOKIE
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+  }
+}
+
+function getCookie(name) {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]*)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+function deleteCookie(name) {
+  if (typeof document !== "undefined") {
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  }
+}
+
 function getCurrentSessionUid() {
+  // 1. Session Cookie (highest priority)
+  const cookieUid = getCookie(SESSION_KEY) || getCookie("mgm_session_uid");
+  if (cookieUid) return cookieUid;
+
+  // 2. sessionStorage (same tab / window session)
   if (typeof sessionStorage !== "undefined") {
-    return sessionStorage.getItem(SESSION_KEY) || (typeof localStorage !== "undefined" ? localStorage.getItem(SESSION_KEY) : null);
+    const sUid = sessionStorage.getItem(SESSION_KEY);
+    if (sUid) return sUid;
+  }
+
+  // 3. Fallback to localStorage
+  if (typeof localStorage !== "undefined") {
+    return localStorage.getItem(SESSION_KEY);
   }
   return null;
 }
 
 function setCurrentSessionUid(uid) {
-  if (typeof sessionStorage !== "undefined") {
-    if (uid) {
+  if (uid) {
+    setSessionCookie(SESSION_KEY, uid);
+    setSessionCookie("mgm_session_uid", uid);
+    if (typeof sessionStorage !== "undefined") {
       sessionStorage.setItem(SESSION_KEY, uid);
-      localStorage.setItem(SESSION_KEY, uid);
-    } else {
+    }
+  } else {
+    deleteCookie(SESSION_KEY);
+    deleteCookie("mgm_session_uid");
+    deleteCookie("mgm_session_role");
+    deleteCookie("mgm_auth_session");
+    if (typeof sessionStorage !== "undefined") {
       sessionStorage.removeItem(SESSION_KEY);
+    }
+    if (typeof localStorage !== "undefined") {
       localStorage.removeItem(SESSION_KEY);
     }
   }

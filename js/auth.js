@@ -11,7 +11,14 @@ import {
   signOut,
   doc, getDoc, setDoc, serverTimestamp
 } from "./firebase-config.js";
-import { isAllowedCollegeEmail, showMessage, clearMessage } from "./utils.js";
+import {
+  isAllowedCollegeEmail,
+  showMessage,
+  clearMessage,
+  setSessionCookie,
+  getCookie,
+  deleteCookie
+} from "./utils.js";
 import { syncUserToGoogleSheet } from "./google-sheets.js";
 
 const ROLE_DASHBOARDS = {
@@ -33,6 +40,14 @@ export async function getUserProfile(uid) {
 
 /** Wires up both login and registration forms on index.html. */
 export function initLoginForm() {
+  // Check if an active session cookie already exists
+  const activeUid = getCookie("mgm_session_uid");
+  const activeRole = getCookie("mgm_session_role");
+  if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole]) {
+    window.location.href = ROLE_DASHBOARDS[activeRole];
+    return;
+  }
+
   initLoginHandler();
   initRegisterTabs();
   initRegisterHandler();
@@ -86,6 +101,8 @@ function initLoginHandler() {
         return;
       }
 
+      setSessionCookie("mgm_session_uid", credential.user.uid);
+      setSessionCookie("mgm_session_role", profile.role);
       window.location.href = destination;
     } catch (err) {
       showMessage(messageEl, mapAuthError(err.code));
@@ -198,7 +215,9 @@ function initRegisterHandler() {
         isActive: true
       }).catch(console.warn);
 
-      // Sign-in successful — navigate to dashboard
+      // Sign-in successful — set session cookies and navigate to dashboard
+      setSessionCookie("mgm_session_uid", uid);
+      setSessionCookie("mgm_session_role", role);
       const dest = ROLE_DASHBOARDS[role] || "faculty-dashboard.html";
       window.location.href = dest;
 
@@ -248,8 +267,17 @@ function mapAuthError(code) {
  */
 export function requireRole(expectedRole) {
   return new Promise((resolve) => {
+    // Fast path: if session cookie role mismatches expected dashboard, redirect
+    const cookieRole = getCookie("mgm_session_role");
+    if (cookieRole && cookieRole !== expectedRole && ROLE_DASHBOARDS[cookieRole]) {
+      window.location.href = ROLE_DASHBOARDS[cookieRole];
+      return;
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
+        deleteCookie("mgm_session_uid");
+        deleteCookie("mgm_session_role");
         window.location.href = "index.html";
         return;
       }
@@ -257,15 +285,22 @@ export function requireRole(expectedRole) {
       const profile = await getUserProfile(user.uid);
 
       if (!profile || profile.isActive === false) {
+        deleteCookie("mgm_session_uid");
+        deleteCookie("mgm_session_role");
         await signOut(auth);
         window.location.href = "index.html";
         return;
       }
 
       if (profile.role !== expectedRole) {
+        setSessionCookie("mgm_session_role", profile.role);
         window.location.href = ROLE_DASHBOARDS[profile.role] || "index.html";
         return;
       }
+
+      // Sync active session cookies
+      setSessionCookie("mgm_session_uid", user.uid);
+      setSessionCookie("mgm_session_role", profile.role);
 
       resolve(profile);
     });

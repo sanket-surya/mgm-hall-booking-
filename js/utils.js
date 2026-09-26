@@ -142,14 +142,52 @@ export function timesOverlap(startA, endA, startB, endB) {
 }
 
 /**
+ * Sets a session cookie (cleared when browser session ends).
+ * @param {string} name
+ * @param {string} value
+ */
+export function setSessionCookie(name, value) {
+  if (typeof document !== "undefined") {
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+  }
+}
+
+/**
+ * Retrieves a cookie value by name.
+ * @param {string} name
+ * @returns {string|null}
+ */
+export function getCookie(name) {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]*)"));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+/**
+ * Deletes a cookie by name.
+ * @param {string} name
+ */
+export function deleteCookie(name) {
+  if (typeof document !== "undefined") {
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+  }
+}
+
+/**
  * Binds click events to all elements with [data-logout] attribute
- * to sign out the user and redirect to login page.
+ * to sign out the user, clear session cookies, and redirect to login page.
  */
 export function bindLogoutButtons() {
   document.querySelectorAll("[data-logout]").forEach((btn) => {
     btn.addEventListener("click", async (e) => {
       e.preventDefault();
       try {
+        deleteCookie("mgm_session_uid");
+        deleteCookie("mgm_session_role");
+        deleteCookie("mgm_auth_session");
+        if (typeof sessionStorage !== "undefined") {
+          sessionStorage.clear();
+        }
         await signOut(auth);
       } catch (err) {
         console.error("Sign-out error:", err);
