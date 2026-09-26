@@ -65,30 +65,6 @@ function getInitialData() {
         isActive: true,
         isApproved: true,
         createdAt: { toMillis: () => Date.now() - 86400000 * 7 }
-      },
-      {
-        id: "usr_faculty_demo",
-        uid: "usr_faculty_demo",
-        name: "Prof. Faculty Member",
-        email: "faculty@mgmcen.ac.in",
-        password: "faculty@mgm2026",
-        role: "faculty",
-        department: "Computer Science & Engineering (CSE)",
-        isActive: true,
-        isApproved: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 5 }
-      },
-      {
-        id: "usr_organizer_demo",
-        uid: "usr_organizer_demo",
-        name: "Event Coordinator",
-        email: "organizer@mgmcen.ac.in",
-        password: "organizer@mgm2026",
-        role: "organizer",
-        department: "Information Technology (IT)",
-        isActive: true,
-        isApproved: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 3 }
       }
     ],
     halls: [
@@ -137,49 +113,48 @@ function getStore() {
   }
   try {
     const data = JSON.parse(raw);
-    // Ensure admin user always has correct details
     let needsSave = false;
     if (!data.users) data.users = [];
     if (!data.bookings) data.bookings = [];
 
+    // Ensure admin user always has correct details
     const admin = data.users.find((u) => u.role === "admin");
     if (admin) {
       admin.name = "Sanket Suryawanshi";
       admin.email = "s25_suryawanshi_sanket@mgmcen.ac.in";
+      admin.isActive = true;
+      admin.isApproved = true;
       needsSave = true;
-    }
-    const faculty = data.users.find((u) => u.email === "faculty@mgmcen.ac.in");
-    if (!faculty) {
-      data.users.push({
-        id: "usr_faculty_demo",
-        uid: "usr_faculty_demo",
-        name: "Prof. Faculty Member",
-        email: "faculty@mgmcen.ac.in",
-        password: "faculty@mgm2026",
-        role: "faculty",
-        department: "Computer Science & Engineering (CSE)",
+    } else {
+      data.users.unshift({
+        id: "usr_admin_sanket",
+        uid: "usr_admin_sanket",
+        name: "Sanket Suryawanshi",
+        email: "s25_suryawanshi_sanket@mgmcen.ac.in",
+        password: "sanket@mgm2026",
+        role: "admin",
+        department: "Information Technology",
         isActive: true,
         isApproved: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 5 }
+        createdAt: { toMillis: () => Date.now() - 86400000 * 7 }
       });
       needsSave = true;
     }
-    const organizer = data.users.find((u) => u.email === "organizer@mgmcen.ac.in");
-    if (!organizer) {
-      data.users.push({
-        id: "usr_organizer_demo",
-        uid: "usr_organizer_demo",
-        name: "Event Coordinator",
-        email: "organizer@mgmcen.ac.in",
-        password: "organizer@mgm2026",
-        role: "organizer",
-        department: "Information Technology (IT)",
-        isActive: true,
-        isApproved: true,
-        createdAt: { toMillis: () => Date.now() - 86400000 * 3 }
-      });
+
+    // Purge any demo accounts
+    const initialUsersCount = data.users.length;
+    data.users = data.users.filter((u) => 
+      u.email !== "faculty@mgmcen.ac.in" &&
+      u.email !== "organizer@mgmcen.ac.in" &&
+      u.id !== "usr_faculty_demo" &&
+      u.id !== "usr_organizer_demo" &&
+      u.id !== "usr_faculty_rajesh" &&
+      u.id !== "usr_organizer_council"
+    );
+    if (data.users.length !== initialUsersCount) {
       needsSave = true;
     }
+
     if (needsSave) {
       saveStore(data);
     }
@@ -277,20 +252,14 @@ export async function mockSignInWithEmailAndPassword(auth, email, password) {
   const store = getStore();
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Find user by exact email or alias
+  // Find user by exact email or admin alias
   let user = store.users.find(
     (u) => u.email.trim().toLowerCase() === normalizedEmail
   );
 
-  // If typed admin@mgmcen.ac.in / sanket@mgmcen.ac.in etc., match correctly
+  // If typed admin@mgmcen.ac.in / sanket@mgmcen.ac.in, match the admin account
   if (!user && (normalizedEmail.startsWith("admin@") || normalizedEmail.startsWith("sanket@"))) {
     user = store.users.find((u) => u.role === "admin");
-  }
-  if (!user && normalizedEmail.startsWith("faculty@")) {
-    user = store.users.find((u) => u.role === "faculty");
-  }
-  if (!user && normalizedEmail.startsWith("organizer@")) {
-    user = store.users.find((u) => u.role === "organizer");
   }
 
   if (!user) {

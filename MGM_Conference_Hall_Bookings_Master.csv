@@ -1,4 +1,1 @@
 "Booking ID","Event Name","Conference Hall","Date","Start Time","End Time","Requested By","Email","Department","Expected Attendees","Status","Purpose","Admin Remarks"
-"BK-2026-001","Annual AI & Robotics Workshop","Sir Vishveshwaraiah Conference Hall","2026-09-28","10:00 AM","01:00 PM","Prof. Rajesh Patil","faculty@mgmcen.ac.in","Computer Science & Engineering","150","APPROVED","Hands-on technical workshop for 3rd and final year students","Approved by Admin"
-"BK-2026-002","National Level Hackathon Orientation","Conference Room B","2026-09-29","02:00 PM","05:00 PM","Student Council","organizer@mgmcen.ac.in","Student Affairs","70","APPROVED","Orientation for participating student teams","Approved"
-"BK-2026-003","Department Faculty Meeting","Conference Room A","2026-09-30","11:00 AM","12:30 PM","Dr. S. K. Deshmukh","faculty@mgmcen.ac.in","Information Technology","35","PENDING","Quarterly syllabus review and NAAC documentation","Under review"
