@@ -106,9 +106,41 @@
   </div>
 </div>
 
+<script>
+  // Immediate tab switcher - works instantly without waiting for any external network
+  (function() {
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
+    const loginForm = document.getElementById("login-form");
+    const registerForm = document.getElementById("register-form");
+    const messageEl = document.getElementById("login-message");
+
+    if (tabLogin && tabRegister && loginForm && registerForm) {
+      tabLogin.addEventListener("click", function() {
+        tabLogin.className = "btn btn-sm btn-primary";
+        tabRegister.className = "btn btn-sm btn-secondary";
+        loginForm.hidden = false;
+        registerForm.hidden = true;
+        if (messageEl) messageEl.hidden = true;
+      });
+      tabRegister.addEventListener("click", function() {
+        tabRegister.className = "btn btn-sm btn-primary";
+        tabLogin.className = "btn btn-sm btn-secondary";
+        loginForm.hidden = true;
+        registerForm.hidden = false;
+        if (messageEl) messageEl.hidden = true;
+      });
+    }
+  })();
+</script>
+
 <script type="module">
   import { initLoginForm } from "./js/auth.js";
-  initLoginForm();
+  try {
+    initLoginForm();
+  } catch (err) {
+    console.error("initLoginForm initialization error:", err);
+  }
 </script>
 
 </body>
