@@ -8,6 +8,25 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css" />
+<script>
+  // Pre-render guard: If user is already logged in, redirect to dashboard immediately
+  (function() {
+    function getCookie(name) {
+      var m = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]*)"));
+      return m ? decodeURIComponent(m[2]) : null;
+    }
+    var uid = getCookie("mgm_session_uid") || getCookie("mgm_current_user_id");
+    var role = getCookie("mgm_session_role");
+    var dashboards = {
+      admin: "admin-dashboard.html",
+      faculty: "faculty-dashboard.html",
+      organizer: "organizer-dashboard.html"
+    };
+    if (uid && role && dashboards[role]) {
+      window.location.replace(dashboards[role]);
+    }
+  })();
+</script>
 </head>
 <body>
 

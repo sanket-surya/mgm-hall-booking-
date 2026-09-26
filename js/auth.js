@@ -40,13 +40,23 @@ export async function getUserProfile(uid) {
 
 /** Wires up both login and registration forms on index.html. */
 export function initLoginForm() {
-  // Check if an active session cookie already exists
-  const activeUid = getCookie("mgm_session_uid");
-  const activeRole = getCookie("mgm_session_role");
-  if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole]) {
-    window.location.href = ROLE_DASHBOARDS[activeRole];
-    return;
+  function checkAndRedirectActiveSession() {
+    const activeUid = getCookie("mgm_session_uid") || getCookie("mgm_current_user_id");
+    const activeRole = getCookie("mgm_session_role");
+    if (activeUid && activeRole && ROLE_DASHBOARDS[activeRole]) {
+      window.location.replace(ROLE_DASHBOARDS[activeRole]);
+      return true;
+    }
+    return false;
   }
+
+  // Check immediately
+  if (checkAndRedirectActiveSession()) return;
+
+  // Handle bfcache when browser back/forward is used
+  window.addEventListener("pageshow", () => {
+    checkAndRedirectActiveSession();
+  });
 
   initLoginHandler();
   initRegisterTabs();
@@ -103,7 +113,7 @@ function initLoginHandler() {
 
       setSessionCookie("mgm_session_uid", credential.user.uid);
       setSessionCookie("mgm_session_role", profile.role);
-      window.location.href = destination;
+      window.location.replace(destination);
     } catch (err) {
       showMessage(messageEl, mapAuthError(err.code));
     } finally {
@@ -219,7 +229,7 @@ function initRegisterHandler() {
       setSessionCookie("mgm_session_uid", uid);
       setSessionCookie("mgm_session_role", role);
       const dest = ROLE_DASHBOARDS[role] || "faculty-dashboard.html";
-      window.location.href = dest;
+      window.location.replace(dest);
 
     } catch (err) {
       showMessage(messageEl, mapRegisterError(err.code, err.message));
@@ -270,15 +280,25 @@ export function requireRole(expectedRole) {
     // Fast path: if session cookie role mismatches expected dashboard, redirect
     const cookieRole = getCookie("mgm_session_role");
     if (cookieRole && cookieRole !== expectedRole && ROLE_DASHBOARDS[cookieRole]) {
-      window.location.href = ROLE_DASHBOARDS[cookieRole];
+      window.location.replace(ROLE_DASHBOARDS[cookieRole]);
       return;
+    }
+
+    // Trap browser back button so back navigation doesn't fall back to login screen
+    try {
+      history.pushState(null, document.title, window.location.href);
+      window.addEventListener("popstate", () => {
+        history.pushState(null, document.title, window.location.href);
+      });
+    } catch (e) {
+      // Ignore if history API restricted
     }
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         deleteCookie("mgm_session_uid");
         deleteCookie("mgm_session_role");
-        window.location.href = "index.html";
+        window.location.replace("index.html");
         return;
       }
 
@@ -288,13 +308,13 @@ export function requireRole(expectedRole) {
         deleteCookie("mgm_session_uid");
         deleteCookie("mgm_session_role");
         await signOut(auth);
-        window.location.href = "index.html";
+        window.location.replace("index.html");
         return;
       }
 
       if (profile.role !== expectedRole) {
         setSessionCookie("mgm_session_role", profile.role);
-        window.location.href = ROLE_DASHBOARDS[profile.role] || "index.html";
+        window.location.replace(ROLE_DASHBOARDS[profile.role] || "index.html");
         return;
       }
 
