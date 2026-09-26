@@ -27,6 +27,8 @@ function notifyListeners(collectionName) {
       // Silently handled
     }
   });
+}
+
 // Listen for storage events across other tabs in the same browser
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
