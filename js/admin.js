@@ -96,27 +96,78 @@ function renderUsersTable() {
     return;
   }
 
-  tbody.innerHTML = rows.map((u) => `
-    <tr>
-      <td class="cell-strong">${escapeHtml(u.name || "—")}</td>
-      <td>${escapeHtml(u.email || "—")}</td>
-      <td style="text-transform:capitalize">${escapeHtml(u.role || "—")}</td>
-      <td>${escapeHtml(u.department || "—")}</td>
-      <td>${u.isActive === false ? '<span class="badge badge-inactive">Deactivated</span>' : '<span class="badge badge-approved">Active</span>'}</td>
-      <td>
-        <div class="inline-actions">
-          <button class="btn btn-sm ${u.isActive === false ? "btn-success" : "btn-secondary"}" data-toggle-user="${u.id}" data-email="${escapeHtml(u.email || "")}" data-next="${u.isActive === false}">
-            ${u.isActive === false ? "Reactivate" : "Deactivate"}
-          </button>
-          ${u.id !== currentProfile.uid ? `
-            <button class="btn btn-sm btn-danger" data-delete-user="${u.id}" data-name="${escapeHtml(u.name || "")}" data-email="${escapeHtml(u.email || "")}">
-              Remove
-            </button>
-          ` : ""}
-        </div>
-      </td>
-    </tr>
-  `).join("");
+  // Sort pending approval requests to the very top
+  const sortedRows = [...rows].sort((a, b) => {
+    const aPending = a.isActive === false && a.isApproved === false;
+    const bPending = b.isActive === false && b.isApproved === false;
+    if (aPending && !bPending) return -1;
+    if (!aPending && bPending) return 1;
+    return (a.name || "").localeCompare(b.name || "");
+  });
+
+  tbody.innerHTML = sortedRows.map((u) => {
+    let statusBadgeHtml = '';
+    let actionBtnHtml = '';
+
+    if (u.isActive === false && u.isApproved === false) {
+      statusBadgeHtml = '<span class="badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a; font-weight:600;">⏳ Pending Approval</span>';
+      actionBtnHtml = `
+        <button class="btn btn-sm btn-success" data-approve-user="${u.id}" data-email="${escapeHtml(u.email || "")}" title="Approve account access">
+          ✅ Approve
+        </button>
+      `;
+    } else if (u.isActive === false) {
+      statusBadgeHtml = '<span class="badge badge-inactive">Deactivated</span>';
+      actionBtnHtml = `
+        <button class="btn btn-sm btn-success" data-toggle-user="${u.id}" data-email="${escapeHtml(u.email || "")}" data-next="true">
+          Reactivate
+        </button>
+      `;
+    } else {
+      statusBadgeHtml = '<span class="badge badge-approved">Active</span>';
+      actionBtnHtml = `
+        <button class="btn btn-sm btn-secondary" data-toggle-user="${u.id}" data-email="${escapeHtml(u.email || "")}" data-next="false">
+          Deactivate
+        </button>
+      `;
+    }
+
+    return `
+      <tr style="${u.isActive === false && u.isApproved === false ? 'background:#fffdf5;' : ''}">
+        <td class="cell-strong">${escapeHtml(u.name || "—")}</td>
+        <td>${escapeHtml(u.email || "—")}</td>
+        <td style="text-transform:capitalize">${escapeHtml(u.role || "—")}</td>
+        <td>${escapeHtml(u.department || "—")}</td>
+        <td>${statusBadgeHtml}</td>
+        <td>
+          <div class="inline-actions">
+            ${actionBtnHtml}
+            ${u.id !== currentProfile.uid ? `
+              <button class="btn btn-sm btn-danger" data-delete-user="${u.id}" data-name="${escapeHtml(u.name || "")}" data-email="${escapeHtml(u.email || "")}">
+                Remove
+              </button>
+            ` : ""}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  tbody.querySelectorAll("[data-approve-user]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const uid = btn.getAttribute("data-approve-user");
+      const email = btn.getAttribute("data-email");
+      btn.disabled = true;
+      try {
+        await updateDoc(doc(db, "users", uid), { isActive: true, isApproved: true });
+        updateUserStatusInGoogleSheet(uid, email, "ACTIVE").catch(console.warn);
+      } catch (err) {
+        alert("Couldn't approve this user: " + err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
 
   tbody.querySelectorAll("[data-toggle-user]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -129,7 +180,7 @@ function renderUsersTable() {
       }
       btn.disabled = true;
       try {
-        await updateDoc(doc(db, "users", uid), { isActive: makeActive });
+        await updateDoc(doc(db, "users", uid), { isActive: makeActive, isApproved: true });
         // Sync status to Google Sheet
         updateUserStatusInGoogleSheet(uid, email, makeActive ? "ACTIVE" : "DEACTIVATED").catch(console.warn);
       } catch (err) {
@@ -218,6 +269,7 @@ function wireCreateUserForm() {
           role,
           department,
           isActive: true,
+          isApproved: true,
           createdAt: serverTimestamp()
         });
       });
@@ -229,7 +281,8 @@ function wireCreateUserForm() {
         name,
         role,
         department,
-        isActive: true
+        isActive: true,
+        isApproved: true
       }).catch(console.warn);
 
       showMessage(messageEl, `Account created for ${name}. Synced to Google Sheet.`, "success");
@@ -472,11 +525,26 @@ function renderOverviewStats() {
   const pending = bookingsCache.filter((b) => b.status === "pending").length;
   const approved = bookingsCache.filter((b) => b.status === "approved").length;
   const activeUsers = usersCache.filter((u) => u.isActive !== false).length;
+  const pendingApprovals = usersCache.filter((u) => u.isActive === false && u.isApproved === false).length;
 
   el.innerHTML = `
     <div class="stat-card"><div class="stat-value">${hallsCache.length}</div><div class="stat-label">Conference halls</div></div>
     <div class="stat-card"><div class="stat-value">${pending}</div><div class="stat-label">Pending bookings</div></div>
     <div class="stat-card"><div class="stat-value">${approved}</div><div class="stat-label">Approved bookings</div></div>
     <div class="stat-card"><div class="stat-value">${activeUsers}</div><div class="stat-label">Active users</div></div>
+    ${pendingApprovals > 0 ? `
+      <div class="stat-card" style="border: 2px solid #f59e0b; background: #fffbeb;">
+        <div class="stat-value" style="color: #b45309;">${pendingApprovals}</div>
+        <div class="stat-label" style="font-weight:600; color:#92400e;">⏳ Pending User Requests</div>
+      </div>
+    ` : ""}
   `;
+
+  // Update Users sidebar button with red badge if any pending approvals
+  const usersNavBtn = document.querySelector('button[data-tab-target="view-users"]');
+  if (usersNavBtn) {
+    usersNavBtn.innerHTML = pendingApprovals > 0 
+      ? `Users <span style="background:#ef4444; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:6px; font-weight:700;">${pendingApprovals}</span>`
+      : 'Users';
+  }
 }

@@ -168,7 +168,7 @@ export async function syncUserToGoogleSheet(user) {
     email: user.email || "—",
     role: user.role || "faculty",
     department: user.department || "—",
-    status: user.isActive === false ? "DEACTIVATED" : "ACTIVE",
+    status: user.isApproved === false ? "PENDING_APPROVAL" : (user.isActive === false ? "DEACTIVATED" : "ACTIVE"),
     timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
   };
 

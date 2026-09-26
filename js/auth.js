@@ -101,7 +101,21 @@ function initLoginHandler() {
       }
       if (profile.isActive === false) {
         await signOut(auth);
-        showMessage(messageEl, "This account has been deactivated. Contact an admin.");
+        deleteCookie("mgm_session_uid");
+        deleteCookie("mgm_session_role");
+        if (profile.isApproved === false) {
+          showMessage(
+            messageEl,
+            "⏳ Your account is pending Admin approval. Please contact the Admin to approve your account.",
+            "warning"
+          );
+        } else {
+          showMessage(
+            messageEl,
+            "🚫 This account has been deactivated. Please contact the Admin.",
+            "error"
+          );
+        }
         return;
       }
       const destination = ROLE_DASHBOARDS[profile.role];
@@ -211,25 +225,47 @@ function initRegisterHandler() {
         name,
         role,
         department,
-        isActive: true,
+        isActive: false, // Requires Admin Approval before login
+        isApproved: false,
         createdAt: serverTimestamp()
       });
 
-      // Instantly sync newly registered user into Google Sheet "Users" tab
+      // Instantly sync newly registered user into Google Sheet "Users" tab as PENDING_APPROVAL
       syncUserToGoogleSheet({
         uid,
         email,
         name,
         role,
         department,
-        isActive: true
+        isActive: false,
+        isApproved: false
       }).catch(console.warn);
 
-      // Sign-in successful — set session cookies and navigate to dashboard
-      setSessionCookie("mgm_session_uid", uid);
-      setSessionCookie("mgm_session_role", role);
-      const dest = ROLE_DASHBOARDS[role] || "faculty-dashboard.html";
-      window.location.replace(dest);
+      // Sign out from immediate auth state so unapproved user cannot access dashboards
+      await signOut(auth);
+      deleteCookie("mgm_session_uid");
+      deleteCookie("mgm_session_role");
+
+      // Reset form and switch to login tab
+      form.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Register & Access Dashboard";
+
+      const tabLogin = document.getElementById("tab-login");
+      const tabRegister = document.getElementById("tab-register");
+      const loginForm = document.getElementById("login-form");
+      if (tabLogin && tabRegister && loginForm) {
+        tabLogin.className = "btn btn-sm btn-primary";
+        tabRegister.className = "btn btn-sm btn-secondary";
+        loginForm.hidden = false;
+        form.hidden = true;
+      }
+
+      showMessage(
+        messageEl,
+        "✅ Registration submitted! Your account is pending Admin approval. You can log in once the College Admin approves your account.",
+        "success"
+      );
 
     } catch (err) {
       showMessage(messageEl, mapRegisterError(err.code, err.message));
