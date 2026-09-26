@@ -170,6 +170,8 @@ export function getCookie(name) {
 export function deleteCookie(name) {
   if (typeof document !== "undefined") {
     document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
+    document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
   }
 }
 
@@ -184,15 +186,20 @@ export function bindLogoutButtons() {
       try {
         deleteCookie("mgm_session_uid");
         deleteCookie("mgm_session_role");
+        deleteCookie("mgm_current_user_id");
+        deleteCookie("svch_session_uid_v1");
         deleteCookie("mgm_auth_session");
         if (typeof sessionStorage !== "undefined") {
           sessionStorage.clear();
+        }
+        if (typeof localStorage !== "undefined") {
+          localStorage.removeItem("svch_session_uid_v1");
         }
         await signOut(auth);
       } catch (err) {
         // Silently handled
       } finally {
-        window.location.href = "index.html";
+        window.location.replace("index.html?logout=true");
       }
     });
   });

@@ -11,6 +11,13 @@
 <script>
   // Pre-render guard: If user is already logged in, redirect to dashboard immediately
   (function() {
+    if (window.location.search.indexOf("logout=true") !== -1) {
+      document.cookie = "mgm_session_uid=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      document.cookie = "mgm_session_role=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      document.cookie = "mgm_current_user_id=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      document.cookie = "svch_session_uid_v1=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+      return;
+    }
     function getCookie(name) {
       var m = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]*)"));
       return m ? decodeURIComponent(m[2]) : null;
