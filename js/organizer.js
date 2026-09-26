@@ -12,6 +12,7 @@ import {
   showMessage, clearMessage, statusBadge, formatDate, formatTime,
   escapeHtml, bindLogoutButtons, initTabs
 } from "./utils.js";
+import { sendBookingToGoogleSheet } from "./google-sheets.js";
 
 let currentProfile = null;
 let hallsCache = [];
@@ -196,7 +197,7 @@ function wireBookingForm() {
     submitBtn.textContent = "Submitting…";
 
     try {
-      await addDoc(collection(db, "bookings"), {
+      const bookingData = {
         userId: currentProfile.uid,
         userName: currentProfile.name || currentProfile.email,
         userEmail: currentProfile.email,
@@ -210,9 +211,19 @@ function wireBookingForm() {
         purpose,
         expectedAttendees: attendees,
         status: "pending",
-        rejectionReason: "",
+        rejectionReason: ""
+      };
+
+      const docRef = await addDoc(collection(db, "bookings"), {
+        ...bookingData,
         createdAt: serverTimestamp()
       });
+
+      // Asynchronously trigger Google Sheet sync
+      sendBookingToGoogleSheet({
+        id: docRef?.id || "",
+        ...bookingData
+      }).catch((e) => console.warn("Google Sheet sync warning:", e));
 
       showMessage(messageEl, `Booking request submitted for "${selectedHall.name}". Waiting for admin approval.`, "success");
       form.reset();

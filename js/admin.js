@@ -14,6 +14,11 @@ import {
   formatDate, formatTime, escapeHtml, timesOverlap,
   bindLogoutButtons, initTabs
 } from "./utils.js";
+import {
+  exportBookingsToCSV,
+  updateGoogleSheetBookingStatus,
+  GOOGLE_SHEETS_CONFIG
+} from "./google-sheets.js";
 
 let currentProfile = null;
 let hallsCache = [];
@@ -33,6 +38,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   wireHallForm();
   document.getElementById("user-role-filter").addEventListener("change", renderUsersTable);
   document.getElementById("booking-status-filter").addEventListener("change", renderBookingsTable);
+
+  const exportBtn = document.getElementById("btn-export-excel");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => {
+      const filter = document.getElementById("booking-status-filter").value;
+      const rows = bookingsCache.filter((b) => filter === "all" || b.status === filter);
+      exportBookingsToCSV(rows.length ? rows : bookingsCache);
+    });
+  }
+
+  const sheetBtn = document.getElementById("btn-open-google-sheet");
+  if (sheetBtn && GOOGLE_SHEETS_CONFIG.sheetViewUrl) {
+    sheetBtn.href = GOOGLE_SHEETS_CONFIG.sheetViewUrl;
+    sheetBtn.style.display = "inline-flex";
+  }
 
   listenUsers();
   listenHalls();
@@ -354,6 +374,7 @@ async function approveBooking(bookingId) {
 
   try {
     await updateDoc(doc(db, "bookings", bookingId), { status: "approved", rejectionReason: "" });
+    updateGoogleSheetBookingStatus(bookingId, "approved").catch((e) => console.warn(e));
   } catch (err) {
     alert("Couldn't approve this booking: " + err.message);
   }
@@ -362,11 +383,13 @@ async function approveBooking(bookingId) {
 async function rejectBooking(bookingId) {
   const reason = prompt("Reason for rejecting this booking (shown to the requester):");
   if (reason === null) return; // admin cancelled the prompt
+  const cleanReason = reason.trim() || "No reason given.";
   try {
     await updateDoc(doc(db, "bookings", bookingId), {
       status: "rejected",
-      rejectionReason: reason.trim() || "No reason given."
+      rejectionReason: cleanReason
     });
+    updateGoogleSheetBookingStatus(bookingId, "rejected", cleanReason).catch((e) => console.warn(e));
   } catch (err) {
     alert("Couldn't reject this booking: " + err.message);
   }
