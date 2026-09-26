@@ -187,6 +187,7 @@ function initRegisterHandler() {
     const role = roleInput.value;
     const department = deptInput.value.trim();
     const password = passwordInput.value;
+    const empId = (document.getElementById("reg-emp-id")?.value || "").trim();
 
     if (!name) {
       showMessage(messageEl, "Please enter your full name.");
@@ -218,6 +219,7 @@ function initRegisterHandler() {
         name,
         role,
         department,
+        employeeId: empId,
         isActive: false, // Requires Admin Approval before login
         isApproved: false,
         createdAt: serverTimestamp()
@@ -328,6 +330,23 @@ export function requireRole(expectedRole) {
       // Sync active session cookies
       setSessionCookie("mgm_session_uid", user.uid);
       setSessionCookie("mgm_session_role", profile.role);
+
+      // --- Session timeout: auto-logout after 30 min inactivity ---
+      let inactivityTimer;
+      const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+      function resetTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(async () => {
+          deleteCookie("mgm_session_uid");
+          deleteCookie("mgm_session_role");
+          await signOut(auth);
+          window.location.replace("index.html?timeout=true");
+        }, SESSION_TIMEOUT);
+      }
+      ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach(evt => {
+        document.addEventListener(evt, resetTimer, { passive: true });
+      });
+      resetTimer();
 
       resolve(profile);
     });
