@@ -10,7 +10,8 @@ import {
   sendEmailVerification,
   onAuthStateChanged,
   signOut,
-  doc, getDoc, setDoc, serverTimestamp
+  doc, getDoc, setDoc, serverTimestamp,
+  collection, query, where, getDocs
 } from "./firebase-config.js";
 import {
   isAllowedCollegeEmail,
@@ -32,14 +33,36 @@ const ROLE_DASHBOARDS = {
 };
 
 /**
- * Reads the Firestore profile doc (users/{uid}) for a signed-in Auth user.
- * Returns null if no matching profile exists yet — e.g. an Auth account
- * was created straight from the Firebase console without also creating a
- * Firestore users/ doc for it.
+ * Reads the Firestore profile doc for a signed-in Auth user.
+ * 1. Checks users/{uid} directly.
+ * 2. If not found (e.g. document created with an auto-ID or custom ID in Firestore),
+ *    it gracefully queries collection('users') by email.
  */
-export async function getUserProfile(uid) {
-  const snap = await getDoc(doc(db, "users", uid));
-  return snap.exists() ? { uid, ...snap.data() } : null;
+export async function getUserProfile(uid, email = "") {
+  try {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      return { uid, id: snap.id, ...snap.data() };
+    }
+  } catch (e) {
+    console.warn("Direct getDoc profile lookup notice:", e);
+  }
+
+  if (email) {
+    try {
+      const qSnap = await getDocs(
+        query(collection(db, "users"), where("email", "==", email.trim().toLowerCase()))
+      );
+      if (!qSnap.empty) {
+        const found = qSnap.docs[0];
+        return { uid, id: found.id, ...found.data() };
+      }
+    } catch (e) {
+      console.warn("Fallback query by email lookup notice:", e);
+    }
+  }
+
+  return null;
 }
 
 /** Wires up both login and registration forms on index.html. */
@@ -95,7 +118,7 @@ function initLoginHandler() {
     setLoading(true);
     try {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const profile = await getUserProfile(credential.user.uid);
+      const profile = await getUserProfile(credential.user.uid, credential.user.email || email);
 
       if (!profile) {
         await signOut(auth);
@@ -336,7 +359,7 @@ export function requireRole(expectedRole) {
         return;
       }
 
-      const profile = await getUserProfile(user.uid);
+      const profile = await getUserProfile(user.uid, user.email);
 
       if (!profile || profile.isActive === false) {
         deleteCookie("mgm_session_uid");

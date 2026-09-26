@@ -136,7 +136,20 @@ export async function getDoc(docRef) {
 export async function getDocs(queryOrCol) {
   if (isMockMode) return mock.mockGetDocs(queryOrCol);
   const mod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-  return mod.getDocs(queryOrCol);
+  let target = queryOrCol;
+  if (queryOrCol?._realCol) {
+    target = mod.collection(db, queryOrCol._realCol);
+  } else if (queryOrCol?.col) {
+    const colName = queryOrCol.col._realCol || queryOrCol.col;
+    const realColRef = mod.collection(db, colName);
+    const constraints = (queryOrCol.constraints || []).map((c) => {
+      if (c.type === "where") return mod.where(c.field, c.op, c.val);
+      if (c.type === "orderBy") return mod.orderBy(c.field, c.dir);
+      return c;
+    });
+    target = mod.query(realColRef, ...constraints);
+  }
+  return mod.getDocs(target);
 }
 
 export async function addDoc(colRef, data) {
@@ -167,7 +180,18 @@ export function onSnapshot(queryOrCol, callback, errCallback) {
   if (isMockMode) return mock.mockOnSnapshot(queryOrCol, callback, errCallback);
   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js").then((mod) => {
     let target = queryOrCol;
-    if (queryOrCol._realCol) target = mod.collection(db, queryOrCol._realCol);
+    if (queryOrCol?._realCol) {
+      target = mod.collection(db, queryOrCol._realCol);
+    } else if (queryOrCol?.col) {
+      const colName = queryOrCol.col._realCol || queryOrCol.col;
+      const realColRef = mod.collection(db, colName);
+      const constraints = (queryOrCol.constraints || []).map((c) => {
+        if (c.type === "where") return mod.where(c.field, c.op, c.val);
+        if (c.type === "orderBy") return mod.orderBy(c.field, c.dir);
+        return c;
+      });
+      target = mod.query(realColRef, ...constraints);
+    }
     mod.onSnapshot(target, callback, errCallback);
   });
   return () => {};
