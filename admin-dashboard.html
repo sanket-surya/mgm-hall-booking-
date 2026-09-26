@@ -41,7 +41,10 @@
 
       <!-- ============ OVERVIEW ============ -->
       <section id="view-overview" class="view active">
-        <div class="view-header"><h2>Dashboard</h2></div>
+        <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <h2>Dashboard</h2>
+          <button type="button" id="btn-reset-test-data" class="btn btn-sm btn-secondary" title="Clears all test bookings and test users">🧹 Reset All Test Data</button>
+        </div>
         <div class="stat-row" id="overview-stats"></div>
         <div class="card card-pad" style="margin-bottom: 20px;">
           <p class="cell-muted" style="margin:0">Use the sidebar to manage halls, review booking requests, and create or deactivate user accounts.</p>

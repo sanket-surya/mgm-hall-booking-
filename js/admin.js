@@ -4,7 +4,7 @@
 
 import { requireRole } from "./auth.js";
 import {
-  db, withSecondaryAuth,
+  db, withSecondaryAuth, resetMockStore,
   collection, doc, addDoc, updateDoc, deleteDoc, setDoc,
   onSnapshot, query, orderBy, serverTimestamp,
   createUserWithEmailAndPassword
@@ -65,6 +65,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (sheetBtn && GOOGLE_SHEETS_CONFIG.sheetViewUrl) {
     sheetBtn.href = GOOGLE_SHEETS_CONFIG.sheetViewUrl;
     sheetBtn.style.display = "inline-flex";
+  }
+
+  const resetBtn = document.getElementById("btn-reset-test-data");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (confirm("Reset all test bookings and test users? The official admin account and conference halls will be preserved.")) {
+        resetMockStore();
+        window.location.reload();
+      }
+    });
   }
 
   listenUsers();

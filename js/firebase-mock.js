@@ -149,9 +149,23 @@ function getStore() {
       u.id !== "usr_faculty_demo" &&
       u.id !== "usr_organizer_demo" &&
       u.id !== "usr_faculty_rajesh" &&
-      u.id !== "usr_organizer_council"
+      u.id !== "usr_organizer_council" &&
+      !u.email.includes("test_faculty")
     );
     if (data.users.length !== initialUsersCount) {
+      needsSave = true;
+    }
+
+    // Purge any demo/test bookings as well!
+    const initialBookingsCount = (data.bookings || []).length;
+    data.bookings = (data.bookings || []).filter((b) =>
+      b.userEmail !== "faculty@mgmcen.ac.in" &&
+      b.userEmail !== "organizer@mgmcen.ac.in" &&
+      b.userEmail !== "test_faculty@mgmcen.ac.in" &&
+      !b.eventName.toLowerCase().includes("symposium") &&
+      !b.eventName.toLowerCase().includes("seminar on ai")
+    );
+    if (data.bookings.length !== initialBookingsCount) {
       needsSave = true;
     }
 
@@ -164,6 +178,15 @@ function getStore() {
     saveStore(init);
     return init;
   }
+}
+
+export function mockResetStore() {
+  const init = getInitialData();
+  saveStore(init);
+  listeners.forEach((_, colName) => {
+    notifyListeners(colName);
+  });
+  return init;
 }
 
 function saveStore(data) {

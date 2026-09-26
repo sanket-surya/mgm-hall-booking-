@@ -45,6 +45,12 @@ if (!isMockMode) {
 export const auth = isMockMode ? mock.mockAuth : realAuthInstance;
 export const db = isMockMode ? mock.mockDb : realDbInstance;
 
+export function resetMockStore() {
+  if (isMockMode && typeof mock.mockResetStore === "function") {
+    return mock.mockResetStore();
+  }
+}
+
 // Secondary Auth Helper
 export async function withSecondaryAuth(action) {
   if (isMockMode) {
