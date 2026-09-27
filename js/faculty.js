@@ -64,7 +64,7 @@ function renderHallsGrid() {
   const grid = document.getElementById("halls-grid");
   if (!grid) return;
 
-  const activeHalls = hallsCache.filter((h) => h.isActive !== false);
+  const activeHalls = hallsCache.filter((h) => h.isActive !== true);
 
   if (activeHalls.length === 0) {
     grid.innerHTML = `<div class="empty-state">No halls currently available.</div>`;
@@ -100,7 +100,7 @@ function populateHallSelect() {
   if (!select) return;
 
   const currentVal = select.value;
-  const activeHalls = hallsCache.filter((h) => h.isActive !== false);
+  const activeHalls = hallsCache.filter((h) => h.isActive !== true);
 
   select.innerHTML = `
     <option value="">Select a hall…</option>
